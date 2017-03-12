@@ -302,7 +302,6 @@ public class Battle : MonoBehaviour{
 
 	// Note: this will be used for replays and maybe save files, so only use data from the move data
 	// and the current state of the map.
-	// TODO: Set target move? Seems necessary for save files.
 	void ExecuteMove(object o){
 		if(o.GetType() == typeof(BattleMove.Move)){
 			var move = (BattleMove.Move)o;
@@ -358,6 +357,10 @@ public class Battle : MonoBehaviour{
 
 			var apCostResult = move.mech.GetAPCostForStandingFire();
 			move.mech.actionPoints -= apCostResult.ap;
+		}else if(o.GetType() == typeof(BattleMove.SetTarget)){
+			var move = (BattleMove.SetTarget)o;
+
+			move.mech.target = move.newTarget;
 		}else{
 			throw new UnityException();
 		}
@@ -723,11 +726,10 @@ public class Battle : MonoBehaviour{
 				this.SetState(BattleState.SelectingAction);
 			}
 		}else if(this.state == BattleState.SetTargetAction){
-			if(clickedTile){
-				this.selectedTile.mech.target = clickedTile.mech;
-			}else{
-				this.selectedTile.mech.target = null;
-			}
+			var move = new BattleMove.SetTarget();
+			move.mech = this.selectedTile.mech;
+			move.newTarget = clickedTile ? clickedTile.mech : null;
+			this.ExecuteMove(move);
 
 			// TODO: Keep mech's dir pointed towards its target, if it has one
 			this.UpdateTargetTile(this.selectedTile.mech);

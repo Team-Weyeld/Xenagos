@@ -50,6 +50,12 @@ public static class BattleMove{
 		public BattleMech mech;
 		public BattleMech target;
 	}
+
+	[System.Serializable]
+	public struct SetTarget{
+		public BattleMech mech;
+		public BattleMech newTarget;
+	}
 }
 
 [System.Serializable]
