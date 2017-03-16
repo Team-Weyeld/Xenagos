@@ -39,22 +39,23 @@ public struct BattleStartData{
 public static class BattleMove{
 	[System.Serializable]
 	public struct Move{
-		public BattleMech mech;
-		public Vector2i newPos;
+		public int mechIndex;
+		public int newIndex;
 		public bool isFiring;
-		public BattleMech target;
+		public int targetMechIndex;
 	}
 
 	[System.Serializable]
 	public struct StandingFire{
-		public BattleMech mech;
-		public BattleMech target;
+		public int mechIndex;
+		public int targetMechIndex;
 	}
 
 	[System.Serializable]
 	public struct SetTarget{
-		public BattleMech mech;
-		public BattleMech newTarget;
+		public int mechIndex;
+		public bool hasTarget;
+		public int targetMechIndex;
 	}
 }
 

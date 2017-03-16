@@ -15,6 +15,7 @@ public class HexTile :
 	public TileData data;
 	public BattleMech mech;
 	public Vector2i pos;
+	public int index;
 
 	bool isAlternate;
 	// TODO: Make static
@@ -32,6 +33,8 @@ public class HexTile :
 		this.battle = newBattle;
 		this.pos = new Vector2i(newX, newY);
 		this.data = newData;
+
+		this.index = newX + newY * this.battle.mapSize.x;
 		this.cameraDir = this.battle.gameCamera.transform.rotation * Vector3.forward;
 
 		this.hexVerts = new Vector3[6];

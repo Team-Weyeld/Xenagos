@@ -1,5 +1,7 @@
 /Library
-*.blend1
 /Temp
+/Obj
+*.blend1
 *.csproj
 *.sln
+*.userprefs

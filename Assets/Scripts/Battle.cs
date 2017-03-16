@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Assertions;
@@ -46,6 +47,7 @@ public class Battle : MonoBehaviour{
 	[HideInInspector] public Vector2i mapSize;
 	[HideInInspector] public PathNetwork pathNetwork;
 
+	BattleHistory history;
 	BattleState state = BattleState.None;
 	HexTile hoveredTile;
 	HexTile selectedTile;
@@ -62,7 +64,7 @@ public class Battle : MonoBehaviour{
 
 	MoveActionData moveActionData;
 
-	public void Init(Game game, BattleStartData startData){
+	public void Init(Game game, BattleHistory battleHistory){
 		this.game = game;
 
 		this.hexRadius = 1f / Mathf.Cos (2f * Mathf.PI / 12f) * this.hexSpacingX * 0.5f;
@@ -71,6 +73,12 @@ public class Battle : MonoBehaviour{
 
 		this.mapGO = new GameObject ("Battle map");
 		this.mapGO.transform.parent = this.worldGO.transform;
+
+		this.history = new BattleHistory();
+		this.history.startData = battleHistory.startData;
+		this.history.moves = new List<object>();
+
+		BattleStartData startData = this.history.startData;
 
 		// Build misc objects.
 
@@ -209,6 +217,7 @@ public class Battle : MonoBehaviour{
 
 		DebugKeys.Subscribe("Test LOS", this.OnDebugKey);
 		DebugKeys.Subscribe("Test pathing", this.OnDebugKey);
+		DebugKeys.Subscribe("Test saving", this.OnDebugKey);
 
 		// UI stuff.
 
@@ -235,6 +244,12 @@ public class Battle : MonoBehaviour{
 
 		this.apTextOriginalColor = this.uiRefs.apText.color;
 
+		// Execute any moves to start with.
+
+		foreach(object o in battleHistory.moves){
+			this.ExecuteMove(o);
+		}
+
 		// Start first state.
 
 		this.UpdateFogOfWar();
@@ -257,8 +272,16 @@ public class Battle : MonoBehaviour{
 		}
 	}
 
+	public HexTile GetTile(int index){
+		return this.tiles[index];
+	}
+
 	public HexTile GetTile(int x, int y){
 		return this.tiles[x + y * this.mapSize.x];
+	}
+
+	public HexTile GetTile(Vector2i pos){
+		return this.tiles[pos.x + pos.y * this.mapSize.x];
 	}
 
 	void UpdateFogOfWar(){
@@ -305,9 +328,11 @@ public class Battle : MonoBehaviour{
 	void ExecuteMove(object o){
 		if(o.GetType() == typeof(BattleMove.Move)){
 			var move = (BattleMove.Move)o;
-			BattleMech mech = move.mech;
+
+			BattleMech mech = this.GetTile(move.mechIndex).mech;
+			BattleMech targetMech = move.isFiring ? this.GetTile(move.targetMechIndex).mech : null;
 			HexTile fromTile = mech.tile;
-			HexTile toTile = this.GetTile(move.newPos.x, move.newPos.y);
+			HexTile toTile = this.GetTile(move.newIndex);
 
 			this.pathNetwork.SetNodeEnabled(fromTile, true);
 
@@ -324,10 +349,10 @@ public class Battle : MonoBehaviour{
 				mech.tile = currentTile;
 
 				if(isFiring){
-					bool canSeeTarget = this.TestLOS(currentTile, move.target.tile);
+					bool canSeeTarget = this.TestLOS(currentTile, targetMech.tile);
 					if(canSeeTarget){
-						this.MechAttack(mech, move.target);
-						if(move.target.isDestroyed){
+						this.MechAttack(mech, targetMech);
+						if(targetMech.isDestroyed){
 							isFiring = false;
 						}
 					}
@@ -353,17 +378,29 @@ public class Battle : MonoBehaviour{
 		}else if(o.GetType() == typeof(BattleMove.StandingFire)){
 			var move = (BattleMove.StandingFire)o;
 
-			this.MechAttack(move.mech, move.target);
+			BattleMech mech = this.GetTile(move.mechIndex).mech;
+			BattleMech targetMech = this.GetTile(move.targetMechIndex).mech;
 
-			var apCostResult = move.mech.GetAPCostForStandingFire();
-			move.mech.actionPoints -= apCostResult.ap;
+			this.MechAttack(mech, targetMech);
+
+			var apCostResult = mech.GetAPCostForStandingFire();
+			mech.actionPoints -= apCostResult.ap;
 		}else if(o.GetType() == typeof(BattleMove.SetTarget)){
 			var move = (BattleMove.SetTarget)o;
 
-			move.mech.target = move.newTarget;
+			BattleMech mech = this.GetTile(move.mechIndex).mech;
+
+			if(move.hasTarget){
+				mech.target = this.GetTile(move.targetMechIndex).mech;
+			}else{
+				mech.target = null;
+			}
 		}else{
 			throw new UnityException();
 		}
+
+		// Add to battle history.
+		this.history.moves.Add(o);
 
 		// Determine if this team's turn is over so we can advance the turn.
 		bool hasAP = false;
@@ -705,10 +742,12 @@ public class Battle : MonoBehaviour{
 				BattleMech mech = this.selectedTile.mech;
 
 				var move = new BattleMove.Move();
-				move.mech = mech;
-				move.newPos = clickedTile.pos;
-				move.target = mech.target;
-				move.isFiring = move.target != null && mech.fireAuto;
+				move.mechIndex = mech.tile.index;
+				move.newIndex = clickedTile.index;
+				move.isFiring = mech.target != null && mech.fireAuto;
+				if(move.isFiring){
+					move.targetMechIndex = mech.target.tile.index;
+				}
 				this.ExecuteMove(move);
 
 				this.moveActionData.moved = true;
@@ -726,13 +765,18 @@ public class Battle : MonoBehaviour{
 				this.SetState(BattleState.SelectingAction);
 			}
 		}else if(this.state == BattleState.SetTargetAction){
+			BattleMech mech = this.selectedTile.mech;
+
 			var move = new BattleMove.SetTarget();
-			move.mech = this.selectedTile.mech;
-			move.newTarget = clickedTile ? clickedTile.mech : null;
+			move.mechIndex = mech.tile.index;
+			move.hasTarget = clickedTile != null;
+			if(move.hasTarget){
+				move.targetMechIndex = clickedTile.index;
+			}
 			this.ExecuteMove(move);
 
 			// TODO: Keep mech's dir pointed towards its target, if it has one
-			this.UpdateTargetTile(this.selectedTile.mech);
+			this.UpdateTargetTile(mech);
 
 			this.UpdateRightPanel();
 
@@ -826,6 +870,12 @@ public class Battle : MonoBehaviour{
 				Debug.Log(result.nodes.Count + " nodes in path " + result.distance + " units long.");
 			}else{
 				Debug.Log("Invalid path!");
+			}
+		}else if(name == "Test saving"){
+			string jsonText = this.history.ToJSON();
+
+			using(StreamWriter sw = new StreamWriter("TestSave.json")){
+				sw.WriteLine(jsonText);
 			}
 		}
 	}
@@ -971,15 +1021,17 @@ public class Battle : MonoBehaviour{
 		}else if(button == this.uiRefs.setTargetButton){
 			this.SetState(BattleState.SetTargetAction);
 		}else if(button == this.uiRefs.fireNowButton){
+			BattleMech mech = this.selectedTile.mech;
+
 			var move = new BattleMove.StandingFire();
-			move.mech = this.selectedTile.mech;
-			move.target = move.mech.target;
+			move.mechIndex = mech.tile.index;
+			move.targetMechIndex = mech.target.tile.index;
 			this.ExecuteMove(move);
 
 			this.UpdateRightPanel();
-			this.UpdateTargetTile(move.mech);
+			this.UpdateTargetTile(mech);
 
-			float newAP = move.mech.actionPoints - move.mech.GetAPCostForStandingFire().ap;
+			float newAP = mech.actionPoints - mech.GetAPCostForStandingFire().ap;
 			this.UpdateActionPointsPreview(newAP);
 		}
 	}

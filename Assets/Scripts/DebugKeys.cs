@@ -30,6 +30,10 @@ public class DebugKeys : MonoBehaviour{
 
 	void Update(){
 		foreach(KeyEntry key in this.keys){
+			if(key.callback == null){
+				continue;
+			}
+
 			if(Input.GetKeyDown(key.key)){
 				Debug.Log("Debug key '" + key.name + "' pressed");
 				key.callback(key.name);

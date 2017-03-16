@@ -6331,6 +6331,8 @@ MonoBehaviour:
     name: Test LOS
   - key: 2
     name: Test pathing
+  - key: 3
+    name: Test saving
 --- !u!114 &1324693378
 MonoBehaviour:
   m_ObjectHideFlags: 0

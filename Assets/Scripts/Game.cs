@@ -23,7 +23,10 @@ public class Game : MonoBehaviour {
 	void Start(){
 		Object.DontDestroyOnLoad(this.gameObject);
 
-		this.battle.Init(this, this.testBattleStartData);
+		BattleHistory battleHistory = new BattleHistory();
+		battleHistory.startData = this.testBattleStartData;
+		battleHistory.moves = new List<object>();
+		this.battle.Init(this, battleHistory);
 	}
 
 	void FixedUpdate(){
