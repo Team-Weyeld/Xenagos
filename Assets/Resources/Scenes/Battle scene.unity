@@ -725,7 +725,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &239210196
 GameObject:
@@ -1613,7 +1613,7 @@ Transform:
   m_Children:
   - {fileID: 715970121}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &429186873
 GameObject:
@@ -2545,7 +2545,7 @@ RectTransform:
   - {fileID: 312926570}
   - {fileID: 279273886}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -4042,7 +4042,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &882711629
 GameObject:
@@ -5155,112 +5155,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ShowMaskGraphic: 0
---- !u!1001 &1066284903
-Prefab:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 1324693376}
-    m_Modifications:
-    - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: inputs.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 458144, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 458144, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 458144, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 458144, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 458144, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 458144, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 458144, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 458144, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: useController
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: inputs.Array.data[0].keyName
-      value: Pan Camera
-      objectReference: {fileID: 0}
-    - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: inputs.Array.data[0].primaryKeycode
-      value: 32
-      objectReference: {fileID: 0}
-    - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: inputs.Array.data[0].secondaryKeycode
-      value: 325
-      objectReference: {fileID: 0}
-    - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: inputs.Array.data[0].saveKey
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: inputs.Array.data[1].keyName
-      value: Test
-      objectReference: {fileID: 0}
-    - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: inputs.Array.data[1].axisType
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: inputs.Array.data[1].saveKey
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: inputs.Array.data[2].keyName
-      value: a
-      objectReference: {fileID: 0}
-    - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: inputs.Array.data[2].saveKey
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: inputs.Array.data[3].keyName
-      value: b
-      objectReference: {fileID: 0}
-    - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: inputs.Array.data[3].saveKey
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: inputs.Array.data[1].secondaryKeycode
-      value: 9
-      objectReference: {fileID: 0}
-    - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 100100000, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-  m_IsPrefabParent: 0
---- !u!4 &1066284904 stripped
-Transform:
-  m_PrefabParentObject: {fileID: 458144, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
-  m_PrefabInternal: {fileID: 1066284903}
 --- !u!1 &1092858093
 GameObject:
   m_ObjectHideFlags: 0
@@ -6218,177 +6112,6 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1318784800}
---- !u!1 &1324693374
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 1324693376}
-  - component: {fileID: 1324693375}
-  - component: {fileID: 1324693378}
-  - component: {fileID: 1324693377}
-  m_Layer: 0
-  m_Name: Game
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1324693375
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1324693374}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2c93ee41bc75bee4c93c88aa762374b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  battle: {fileID: 1721908773}
-  testBattleStartData:
-    mapSize:
-      x: 8
-      y: 8
-    teams:
-    - mechs:
-      - mechName: Solais
-        pos:
-          x: 6
-          y: 6
-        direction: 0
-      color: {r: 0.891, g: 0.247698, b: 0.247698, a: 0}
-      isPlayer: 0
-    - mechs:
-      - mechName: Caliburn
-        pos:
-          x: 2
-          y: 2
-        direction: 1
-      color: {r: 0.20112453, g: 0.37175155, b: 0.9117647, a: 0}
-      isPlayer: 1
-    baseTileName: Grass
-    tileOverrides:
-    - posX: 3
-      posY: 5
-      name: Rock wall
-    - posX: 4
-      posY: 5
-      name: Rock wall
-    - posX: 5
-      posY: 4
-      name: Rock wall
-    - posX: 3
-      posY: 3
-      name: Trees
-    - posX: 5
-      posY: 7
-      name: Trees
-    - posX: 6
-      posY: 7
-      name: Trees
-    - posX: 7
-      posY: 7
-      name: Trees
-    - posX: 7
-      posY: 6
-      name: Trees
-    - posX: 5
-      posY: 6
-      name: Trees
-    - posX: 0
-      posY: 0
-      name: Trees
---- !u!4 &1324693376
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1324693374}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 1066284904}
-  m_Father: {fileID: 0}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1324693377
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1324693374}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a82e0cd9903d32b4cba30a1e17ceb549, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  keys:
-  - key: 1
-    name: Test LOS
-  - key: 2
-    name: Test pathing
-  - key: 3
-    name: Test saving
---- !u!114 &1324693378
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1324693374}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fd626fcd06c5894f8cc14a12e1fb63a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mechs:
-  - name: Caliburn
-    sprite: {fileID: 21300000, guid: a3022c4945f07d74ba01c459b10062b6, type: 3}
-    maxHP: 32
-    damage: 5
-    movementCost: 1
-  - name: Solais
-    sprite: {fileID: 21300000, guid: c9dbdce401f3bc64e956ff2845c92fe8, type: 3}
-    maxHP: 20
-    damage: 4
-    movementCost: 1.8
-  tiles:
-  - name: Grass
-    description: It's grass. It's green. You can walk on it.
-    groundMaterial: {fileID: 2100000, guid: 146c913387c863040b6ee555df2ea51e, type: 2}
-    wallMaterial: {fileID: 0}
-    sprite: {fileID: 0}
-    losAmount: 1
-    allowsMovement: 1
-    movementSpeedMult: 1
-  - name: Rock wall
-    description: Wall made of solid rock. Blocks movement and line of sight.
-    groundMaterial: {fileID: 2100000, guid: 1314347bdfa66d548a45aeff63929916, type: 2}
-    wallMaterial: {fileID: 2100000, guid: 41f808c002eee5e41a7939eff8de800a, type: 2}
-    sprite: {fileID: 0}
-    losAmount: 0
-    allowsMovement: 0
-    movementSpeedMult: 1
-  - name: Trees
-    description: Group of pine trees. Cannot be traversed by all but the smallest
-      machines. Shots passing through are given a severe penalty to hit chance.
-    groundMaterial: {fileID: 2100000, guid: 146c913387c863040b6ee555df2ea51e, type: 2}
-    wallMaterial: {fileID: 0}
-    sprite: {fileID: 21300000, guid: c4232099d7944d14c93f05818bbf8275, type: 3}
-    losAmount: 0.2
-    allowsMovement: 0
-    movementSpeedMult: 1
-  - name: Destroyed mech
-    description: The blazing remains of a junked mech. The cockpit is unrecognizable.
-    groundMaterial: {fileID: 0}
-    wallMaterial: {fileID: 0}
-    sprite: {fileID: 21300000, guid: 3514fe4db59e75a4bae4280930986579, type: 3}
-    losAmount: 0.9
-    allowsMovement: 0
-    movementSpeedMult: 1
 --- !u!1 &1341594375
 GameObject:
   m_ObjectHideFlags: 0
@@ -8058,7 +7781,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1721908773
 MonoBehaviour:

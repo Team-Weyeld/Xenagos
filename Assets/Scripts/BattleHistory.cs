@@ -24,7 +24,7 @@ public struct BattleHistory{
 		for(int n = 0; n < this.moves.Count; ++n){
 			object o = this.moves[n];
 
-			output.moveTypeNames[n] = o.GetType().Name;
+			output.moveTypeNames[n] = o.GetType().FullName;
 
 			if(o.GetType() == typeof(BattleMove.Move)){
 				var move = (BattleMove.Move)o;

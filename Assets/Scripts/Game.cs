@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class Game : MonoBehaviour {
-	public Battle battle;
+public class Game : MonoBehaviour{
 	public BattleStartData testBattleStartData;
 
 	static Game instance;
@@ -26,7 +26,15 @@ public class Game : MonoBehaviour {
 		BattleHistory battleHistory = new BattleHistory();
 		battleHistory.startData = this.testBattleStartData;
 		battleHistory.moves = new List<object>();
-		this.battle.Init(this, battleHistory);
+		Game.StartBattle(battleHistory);
+	}
+
+	void Update(){
+		if(hardInput.GetKeyDown("Test loading")){
+			Debug.Log("Testing loading");
+
+			SceneManager.LoadScene("Test load menu");
+		}
 	}
 
 	void FixedUpdate(){
@@ -35,5 +43,21 @@ public class Game : MonoBehaviour {
 
 	void OnDrawGizmos(){
 		DebugDrawers.OnDrawGizmos();
+	}
+
+	public static void StartBattle(BattleHistory battleHistory){
+		IEnumerator coroutine = instance.StartBattleInternal(battleHistory);
+		instance.StartCoroutine(coroutine);
+	}
+
+	IEnumerator StartBattleInternal(BattleHistory battleHistory){
+		AsyncOperation asyncOperation = SceneManager.LoadSceneAsync("Battle scene");
+
+		yield return new WaitUntil(() => asyncOperation.isDone);
+
+		GameObject go = GameObject.Find("Battle");
+		Battle battle = go.GetComponent<Battle>();
+
+		battle.Init(this, battleHistory);
 	}
 }

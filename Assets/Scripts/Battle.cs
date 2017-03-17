@@ -213,12 +213,6 @@ public class Battle : MonoBehaviour{
 		this.currentTeamIndex = 1;
 		this.currentTeam = this.teams[this.currentTeamIndex];
 
-		// Event stuff.
-
-		DebugKeys.Subscribe("Test LOS", this.OnDebugKey);
-		DebugKeys.Subscribe("Test pathing", this.OnDebugKey);
-		DebugKeys.Subscribe("Test saving", this.OnDebugKey);
-
 		// UI stuff.
 
 		this.uiRefs.tileInfoBorder.SetActive(false);
@@ -269,6 +263,56 @@ public class Battle : MonoBehaviour{
 				mouseRatioY * cameraSizeY * -8f
 			);
 			this.cameraPivot.transform.position = newPos;
+		}
+
+		if(hardInput.GetKeyDown("Test LOS")){
+			// Draw a LOS test line from the selected tile to all other tiles.
+
+			Debug.Log("Testing LOS");
+
+			if(this.selectedTile == null){
+				return;
+			}
+
+			foreach(HexTile tile in this.tiles){
+				bool canSee = this.TestLOS(this.selectedTile, tile);
+
+				DebugDrawers.SpawnLine(
+					this.selectedTile.transform.position,
+					tile.transform.position,
+					canSee ? Color.green : Color.red,
+					2f
+				);
+			}
+		}else if(hardInput.GetKeyDown("Test pathing")){
+			Debug.Log("Testing pathing");
+
+			if(this.selectedTile == null || this.hoveredTile == null){
+				return;
+			}
+
+			PathingResult result = this.pathNetwork.FindPath(
+				this.selectedTile,
+				this.hoveredTile,
+				true
+			);
+
+			if(result.isValid){
+				Debug.Log(result.nodes.Count + " nodes in path " + result.distance + " units long.");
+			}else{
+				Debug.Log("Invalid path!");
+			}
+		}else if(hardInput.GetKeyDown("Test saving")){
+			Debug.Log("Testing saving");
+
+			string jsonText = this.history.ToJSON();
+			string path = "TestSave.json";
+
+			using(StreamWriter sw = new StreamWriter(path)){
+				sw.WriteLine(jsonText);
+			}
+
+			Debug.Log("Wrote save to " + path);
 		}
 	}
 
@@ -831,51 +875,6 @@ public class Battle : MonoBehaviour{
 				mr.sharedMaterial = Resources.Load<Material>("Materials/Hovered tile");
 			}else{
 				mr.sharedMaterial = Resources.Load<Material>("Materials/Hovered tile invalid");
-			}
-		}
-	}
-
-	void OnDebugKey(string name){
-		if(name == "Test LOS"){
-			// Draw a LOS test line from the selected tile to all other tiles.
-
-			if(this.selectedTile == null){
-				return;
-			}
-
-			foreach(HexTile tile in this.tiles){
-				bool canSee = this.TestLOS(this.selectedTile, tile);
-
-				DebugDrawers.SpawnLine(
-					this.selectedTile.transform.position,
-					tile.transform.position,
-					canSee ? Color.green : Color.red,
-					2f
-				);
-			}
-		}else if(name == "Test pathing"){
-			if(this.selectedTile == null || this.hoveredTile == null){
-				return;
-			}
-
-			Debug.Log("Testing pathing");
-
-			PathingResult result = this.pathNetwork.FindPath(
-				this.selectedTile,
-				this.hoveredTile,
-				true
-			);
-
-			if(result.isValid){
-				Debug.Log(result.nodes.Count + " nodes in path " + result.distance + " units long.");
-			}else{
-				Debug.Log("Invalid path!");
-			}
-		}else if(name == "Test saving"){
-			string jsonText = this.history.ToJSON();
-
-			using(StreamWriter sw = new StreamWriter("TestSave.json")){
-				sw.WriteLine(jsonText);
 			}
 		}
 	}
