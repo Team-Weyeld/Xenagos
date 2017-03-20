@@ -1,11 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 public class MechSpriteAttribute : PropertyAttribute{
 	// ok unity
 }
+
+#if UNITY_EDITOR
 
 [CustomPropertyDrawer (typeof (MechSpriteAttribute))]
 public class MechSpriteProperyDrawer : PropertyDrawer {
@@ -50,3 +54,5 @@ public class MechSpriteProperyDrawer : PropertyDrawer {
 		return labelHeight + imageHeight + padding * 2;
 	}
 }
+
+#endif

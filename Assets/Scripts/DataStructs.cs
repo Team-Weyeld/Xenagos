@@ -32,6 +32,7 @@ public struct BattleStartData{
 
 	public Vector2i mapSize;
 	public Team[] teams;
+	public int startingTeamIndex;
 	public string baseTileName;
 	public TileOverride[] tileOverrides;
 }

@@ -222,7 +222,7 @@ public class Battle : MonoBehaviour{
 			}
 		}
 			
-		this.currentTeamIndex = this.history.currentTeamIndex;
+		this.currentTeamIndex = this.history.startData.startingTeamIndex;
 		this.currentTeam = this.teams[this.currentTeamIndex];
 
 		// UI stuff.
@@ -257,6 +257,9 @@ public class Battle : MonoBehaviour{
 		foreach(object o in battleHistory.moves){
 			this.ExecuteMove(o);
 		}
+
+		this.currentTeamIndex = battleHistory.currentTeamIndex;
+		this.currentTeam = this.teams[this.currentTeamIndex];
 
 		// Start first state.
 

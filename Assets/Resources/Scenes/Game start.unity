@@ -266,6 +266,7 @@ MonoBehaviour:
         direction: 1
       color: {r: 0.20112453, g: 0.37175155, b: 0.9117647, a: 0}
       isPlayer: 1
+    startingTeamIndex: 1
     baseTileName: Grass
     tileOverrides:
     - posX: 3
