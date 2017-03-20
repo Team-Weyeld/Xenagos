@@ -122,17 +122,29 @@ public class Battle : MonoBehaviour{
 			var entry = new EventTrigger.Entry();
 			entry.eventID = EventTriggerType.PointerClick;
 			entry.callback.AddListener((data) => {
-				if(((PointerEventData)data).button == 0){
-					this.HexTileMouseEvent(null, MouseEventType.Click);
+				var button = ((PointerEventData)data).button;
+				if(button == PointerEventData.InputButton.Left){
+					this.MouseEvent(null, MouseEventType.Click);
+				}else if(button == PointerEventData.InputButton.Right){
+					this.MouseEvent(null, MouseEventType.RightClick);
 				}
 			});
 			eventTrigger.triggers.Add(entry);
+		}
 
-			entry = new EventTrigger.Entry();
-			entry.eventID = EventTriggerType.PointerEnter;
+		{
+			// Let us know when anything on the UI is clicked (and not handled by a button or something).
+
+			EventTrigger eventTrigger = this.uiRefs.canvas.gameObject.AddComponent<EventTrigger>();
+
+			var entry = new EventTrigger.Entry();
+			entry.eventID = EventTriggerType.PointerClick;
 			entry.callback.AddListener((data) => {
-				if(((PointerEventData)data).button == 0){
-					this.HexTileMouseEvent(null, MouseEventType.Enter);
+				var button = ((PointerEventData)data).button;
+				if(button == PointerEventData.InputButton.Left){
+					this.MouseEvent(null, MouseEventType.Click);
+				}else if(button == PointerEventData.InputButton.Right){
+					this.MouseEvent(null, MouseEventType.RightClick);
 				}
 			});
 			eventTrigger.triggers.Add(entry);
@@ -599,6 +611,8 @@ public class Battle : MonoBehaviour{
 		Debug.Log("Beginning state " + this.state);
 
 		if(this.state == BattleState.SelectingAction){
+			this.HexTileHovered();
+
 			this.uiRefs.actionGreyoutPanel.SetActive(false);
 		}else if(this.state == BattleState.MoveAction){
 			this.uiRefs.actionGreyoutPanel.SetActive(true);
@@ -638,13 +652,13 @@ public class Battle : MonoBehaviour{
 			);
 
 			if(this.CanClickTile() == false){
-				return;
+				goto end;
 			}
 
 			PathingResult result = this.moveActionData.pathingResult.Value;
 
 			if(result.isValid == false){
-				return;
+				goto end;
 			}
 
 			// Create ghost mechs
@@ -700,6 +714,15 @@ public class Battle : MonoBehaviour{
 
 			float apRequired = this.selectedTile.mech.GetAPCostForMove(result.nodes).ap;
 			this.UpdateActionPointsPreview(this.selectedTile.mech.actionPoints - apRequired);
+		}
+
+		end:
+
+		var mr = this.hoveredTileGO.GetComponent<MeshRenderer>();
+		if(this.CanClickTile()){
+			mr.sharedMaterial = Resources.Load<Material>("Materials/Hovered tile");
+		}else{
+			mr.sharedMaterial = Resources.Load<Material>("Materials/Hovered tile invalid");
 		}
 	}
 
@@ -828,6 +851,19 @@ public class Battle : MonoBehaviour{
 		}
 	}
 
+	// NOTE: can be null
+	void HexTileRightClicked(){
+//		HexTile clickedTile = this.hoveredTile;
+
+		if(this.state == BattleState.SelectingAction){
+			// Attack selected mech maybe?
+		}else if(this.state == BattleState.MoveAction){
+			this.SetState(BattleState.SelectingAction);
+		}else if(this.state == BattleState.SetTargetAction){
+			this.SetState(BattleState.SelectingAction);
+		}
+	}
+
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// Event-like functions
@@ -836,8 +872,9 @@ public class Battle : MonoBehaviour{
 		Enter,
 		Exit,
 		Click,
+		RightClick,
 	}
-	public void HexTileMouseEvent(HexTile tile, MouseEventType eventType){
+	public void MouseEvent(HexTile tile, MouseEventType eventType){
 		if(hardInput.GetKey("Pan Camera")){
 			return;
 		}
@@ -852,6 +889,8 @@ public class Battle : MonoBehaviour{
 			if(this.CanClickTile()){
 				this.HexTileClicked();
 			}
+		}else if(eventType == MouseEventType.RightClick){
+			this.HexTileRightClicked();
 		}
 
 		if(newHoveredTile != this.hoveredTile){
@@ -869,13 +908,6 @@ public class Battle : MonoBehaviour{
 			}
 
 			this.HexTileHovered();
-
-			var mr = this.hoveredTileGO.GetComponent<MeshRenderer>();
-			if(this.CanClickTile()){
-				mr.sharedMaterial = Resources.Load<Material>("Materials/Hovered tile");
-			}else{
-				mr.sharedMaterial = Resources.Load<Material>("Materials/Hovered tile invalid");
-			}
 		}
 	}
 

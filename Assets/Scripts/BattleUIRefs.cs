@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class BattleUIRefs : MonoBehaviour{
+	public Canvas canvas;
 	[Header("Tile info panel")]
 	public GameObject tileInfoBorder;
 	[Space]

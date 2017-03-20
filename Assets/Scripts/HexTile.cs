@@ -216,16 +216,18 @@ public class HexTile :
 	}
 
 	public void OnPointerEnter(PointerEventData eventData){
-		this.battle.HexTileMouseEvent(this, Battle.MouseEventType.Enter);
+		this.battle.MouseEvent(this, Battle.MouseEventType.Enter);
 	}
 
 	public void OnPointerExit(PointerEventData eventData){
-		this.battle.HexTileMouseEvent(this, Battle.MouseEventType.Exit);
+		this.battle.MouseEvent(this, Battle.MouseEventType.Exit);
 	}
 
 	public void OnPointerClick(PointerEventData eventData){
-		if(eventData.button == 0){
-			this.battle.HexTileMouseEvent(this, Battle.MouseEventType.Click);
+		if(eventData.button == PointerEventData.InputButton.Left){
+			this.battle.MouseEvent(this, Battle.MouseEventType.Click);
+		}else if(eventData.button == PointerEventData.InputButton.Right){
+			this.battle.MouseEvent(this, Battle.MouseEventType.RightClick);
 		}
 	}
 }
