@@ -4,6 +4,7 @@ using UnityEngine;
 
 struct SerializedHistory{
 	public BattleStartData startData;
+	public int currentTeamIndex;
 	// This is really stupid and it makes the output really ugly but it's the easiest way because Unity's json utility
 	// is garbo.
 	public string[] moveTypeNames;
@@ -13,11 +14,13 @@ struct SerializedHistory{
 [System.Serializable]
 public struct BattleHistory{
 	public BattleStartData startData;
+	public int currentTeamIndex;
 	public List<object> moves;
 
 	public string ToJSON(){
 		SerializedHistory output = new SerializedHistory();
 		output.startData = this.startData;
+		output.currentTeamIndex = this.currentTeamIndex;
 		output.moveTypeNames = new string[this.moves.Count];
 		output.jsonTextOfMoves = new string[this.moves.Count];
 
@@ -49,6 +52,7 @@ public struct BattleHistory{
 		SerializedHistory input = JsonUtility.FromJson<SerializedHistory>(jsonText);
 
 		this.startData = input.startData;
+		this.currentTeamIndex = input.currentTeamIndex;
 
 		this.moves = new List<object>(input.jsonTextOfMoves.Length);
 		for(int n = 0; n < input.jsonTextOfMoves.Length; ++n){

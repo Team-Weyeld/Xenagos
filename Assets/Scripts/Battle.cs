@@ -76,6 +76,7 @@ public class Battle : MonoBehaviour{
 
 		this.history = new BattleHistory();
 		this.history.startData = battleHistory.startData;
+		this.history.currentTeamIndex = battleHistory.currentTeamIndex;
 		this.history.moves = new List<object>();
 
 		BattleStartData startData = this.history.startData;
@@ -220,9 +221,8 @@ public class Battle : MonoBehaviour{
 				mech.team = team;
 			}
 		}
-
-		// Temporary
-		this.currentTeamIndex = 1;
+			
+		this.currentTeamIndex = this.history.currentTeamIndex;
 		this.currentTeam = this.teams[this.currentTeamIndex];
 
 		// UI stuff.
@@ -232,6 +232,8 @@ public class Battle : MonoBehaviour{
 		this.uiRefs.pilotTab.SetActive(false);
 		this.uiRefs.tileTab.SetActive(false);
 		this.uiRefs.actionsPanel.SetActive(false);
+
+		Utility.AddButtonClickListener(this.uiRefs.finishTurnButton, this.UnitListButtonPressed);
 
 		Utility.AddButtonClickListener(this.uiRefs.mechTabButton, this.TileInfoTabButtonClicked);
 		Utility.AddButtonClickListener(this.uiRefs.pilotTabButton, this.TileInfoTabButtonClicked);
@@ -475,6 +477,8 @@ public class Battle : MonoBehaviour{
 		// Switch current team.
 		this.currentTeamIndex = (this.currentTeamIndex + 1) % this.teams.Count;
 		this.currentTeam = this.teams[this.currentTeamIndex];
+		// TODO: "history" is turning out to be "save file" or something
+		this.history.currentTeamIndex = this.currentTeamIndex;
 
 		// Refill new team's action points.
 		foreach(BattleMech mech in this.currentTeam.mechs){
@@ -613,10 +617,8 @@ public class Battle : MonoBehaviour{
 		if(this.state == BattleState.SelectingAction){
 			this.HexTileHovered();
 
-			this.uiRefs.actionGreyoutPanel.SetActive(false);
+			this.SetMenusUsable(true);
 		}else if(this.state == BattleState.MoveAction){
-			this.uiRefs.actionGreyoutPanel.SetActive(true);
-
 			this.moveActionData = new MoveActionData();
 			this.moveActionData.fromTile = this.selectedTile;
 			this.moveActionData.pathingResult = null;
@@ -624,8 +626,10 @@ public class Battle : MonoBehaviour{
 			this.moveActionData.moved = false;
 
 			this.pathNetwork.SetNodeEnabled(this.moveActionData.fromTile, true);
+
+			this.SetMenusUsable(false);
 		}else if(this.state == BattleState.SetTargetAction){
-			this.uiRefs.actionGreyoutPanel.SetActive(true);
+			this.SetMenusUsable(false);
 		}else{
 			throw new UnityException();
 		}
@@ -915,6 +919,12 @@ public class Battle : MonoBehaviour{
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// UI functions
 
+	void SetMenusUsable(bool usable){
+		this.uiRefs.finishTurnButton.interactable = usable;
+
+		this.uiRefs.actionsGreyoutPanel.SetActive(!usable);
+	}
+
 	void BringTileTabButtonToFront(Button button){
 		this.uiRefs.tileTabButton.gameObject.transform.SetAsLastSibling();
 		this.uiRefs.pilotTabButton.gameObject.transform.SetAsLastSibling();
@@ -1028,6 +1038,12 @@ public class Battle : MonoBehaviour{
 		this.uiRefs.apText.text = text;
 
 		this.uiRefs.apText.color = this.apTextOriginalColor;
+	}
+
+	void UnitListButtonPressed(Button button){
+		if(button == this.uiRefs.finishTurnButton){
+			this.AdvanceTurn();
+		}
 	}
 
 	void TileInfoTabButtonClicked(Button button){

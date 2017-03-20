@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class BattleUIRefs : MonoBehaviour{
 	public Canvas canvas;
+	[Header("Unit list panel")]
+	public Button finishTurnButton;
 	[Header("Tile info panel")]
 	public GameObject tileInfoBorder;
 	[Space]
@@ -26,7 +28,7 @@ public class BattleUIRefs : MonoBehaviour{
 
 	[Header("Actions panel")]
 	public GameObject actionsPanel;
-	public GameObject actionGreyoutPanel;
+	public GameObject actionsGreyoutPanel;
 	public Button moveButton;
 	public Button setTargetButton;
 	public Toggle fireAutoToggle;

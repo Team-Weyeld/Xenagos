@@ -25,6 +25,7 @@ public class Game : MonoBehaviour{
 
 		BattleHistory battleHistory = new BattleHistory();
 		battleHistory.startData = this.testBattleStartData;
+		battleHistory.currentTeamIndex = 1;
 		battleHistory.moves = new List<object>();
 		Game.StartBattle(battleHistory);
 	}
