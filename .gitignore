@@ -1,7 +1,7 @@
 /Library
 /Temp
 /Obj
-/Build
+/Builds
 *.blend1
 *.csproj
 *.sln
