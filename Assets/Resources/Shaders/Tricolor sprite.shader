@@ -54,25 +54,15 @@
 			
 			float4 frag (v2f i) : SV_Target
 			{
-				float4 inputRaw = tex2D(_MainTex, i.uv);
-				float3 input = inputRaw.xyz;
-				float alpha = inputRaw.a;
+				float4 input = tex2D(_MainTex, i.uv);
 
-				input[0] *= _Color0.a;
-				input[1] *= _Color1.a;
-				input[2] *= _Color2.a;
+				float4 resultColor = float4(0, 0, 0, 0);
+				resultColor = lerp(resultColor, _Color0, input[0] * _Color0.a);
+				resultColor = lerp(resultColor, _Color1, input[1] * _Color1.a);
+				resultColor = lerp(resultColor, _Color2, input[2] * _Color2.a);
+				resultColor.a = input.a;
 
-				float value = max(max(input[0], input[1]), input[2]);
-
-				float3 color0 = _Color0.xyz * input[0];
-				float3 color1 = _Color1.xyz * input[1];
-				float3 color2 = _Color2.xyz * input[2];
-				float total = input[0] + input[1] + input[2];
-				
-				float4 output = float4((color0 + color1 + color2) / total * value, alpha);
-//				float4 output = float4((color0 + color1 + color2) * value, alpha);
-
-				output *= _Tint;
+				float4 output = resultColor * _Tint;
 
 				return output;
 			}
