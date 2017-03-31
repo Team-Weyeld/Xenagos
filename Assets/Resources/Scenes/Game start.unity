@@ -266,7 +266,7 @@ MonoBehaviour:
         direction: 1
       color: {r: 0.20112453, g: 0.37175155, b: 0.9117647, a: 0}
       isPlayer: 1
-    startingTeamIndex: 1
+    startingTeamIndex: 0
     baseTileName: Grass
     tileOverrides:
     - posX: 3
@@ -299,6 +299,7 @@ MonoBehaviour:
     - posX: 0
       posY: 0
       name: Trees
+  _fixedFrameCount: 0
 --- !u!4 &1324693376
 Transform:
   m_ObjectHideFlags: 0

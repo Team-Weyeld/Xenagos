@@ -7,17 +7,25 @@ public class Game : MonoBehaviour{
 	public BattleStartData testBattleStartData;
 
 	static Game instance;
-	long fixedFrameCount;
+
+	[HideInInspector]
+	public long _fixedFrameCount;
+
+	public static long fixedFrameCount{
+		get{
+			return instance._fixedFrameCount;
+		}
+	}
 
 	public static double time{
 		get{
-			return (double)instance.fixedFrameCount * (double)Time.fixedDeltaTime;
+			return (double)instance._fixedFrameCount * (double)Time.fixedDeltaTime;
 		}
 	}
 
 	void Awake(){
 		Game.instance = this;
-		this.fixedFrameCount = 0;
+		this._fixedFrameCount = 0;
 	}
 
 	void Start(){
@@ -25,7 +33,7 @@ public class Game : MonoBehaviour{
 
 		BattleHistory battleHistory = new BattleHistory();
 		battleHistory.startData = this.testBattleStartData;
-		battleHistory.currentTeamIndex = 1;
+		battleHistory.currentTeamIndex = battleHistory.startData.startingTeamIndex;
 		battleHistory.moves = new List<object>();
 		Game.StartBattle(battleHistory);
 	}
@@ -39,7 +47,7 @@ public class Game : MonoBehaviour{
 	}
 
 	void FixedUpdate(){
-		++this.fixedFrameCount;
+		++this._fixedFrameCount;
 	}
 
 	void OnDrawGizmos(){

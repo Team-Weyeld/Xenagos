@@ -16,6 +16,7 @@ public class BattleMech : MonoBehaviour{
 	public float maxActionPoints;
 	public float actionPoints;
 	public BattleTeam team;
+	public BattleMechAi ai;
 	public BattleMech target;
 	public bool fireAuto;
 	public bool isDestroyed;

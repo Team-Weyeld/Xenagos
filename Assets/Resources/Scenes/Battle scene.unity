@@ -3958,7 +3958,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 348.5}
+  m_AnchoredPosition: {x: 0, y: 347.5}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &873554726
@@ -8000,8 +8000,8 @@ MonoBehaviour:
   world2DGO: {fileID: 199606171}
   gameCamera: {fileID: 239210200}
   cameraPivot: {fileID: 715970121}
-  visualFogOfWar: 1
-  fogOfWar: 1
+  visualFogOfWar: 0
+  fogOfWar: 0
   game: {fileID: 0}
   mapGO: {fileID: 0}
   hexSpacingY: 0

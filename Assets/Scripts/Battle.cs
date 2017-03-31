@@ -8,6 +8,8 @@ using UnityEngine.UI;
 
 public enum BattleState{
 	None,
+	AiControl,
+	EndOfAction,
 	SelectingAction,
 	MoveAction,
 	SetTargetAction,
@@ -26,6 +28,7 @@ struct MoveActionData{
 public class BattleTeam{
 	public List<BattleMech> mechs;
 	public bool isPlayer;
+	public BattleTeamAi ai;
 	// Updated with UpdateFogOfWar
 	public bool[] visibleTiles;
 }
@@ -46,6 +49,7 @@ public class Battle : MonoBehaviour{
 	[HideInInspector] public float hexSideLength;
 	[HideInInspector] public Vector2i mapSize;
 	[HideInInspector] public PathNetwork pathNetwork;
+	[HideInInspector] public List<BattleTeam> teams;
 
 	BattleHistory history;
 	BattleState state = BattleState.None;
@@ -56,11 +60,11 @@ public class Battle : MonoBehaviour{
 	GameObject targetTileGO;
 	GameObject backgroundGO;
 	HexTile[] tiles;
-	List<BattleTeam> teams;
 	int currentTeamIndex;
 	BattleTeam currentTeam;
 	// TODO: This is dumb, though it will eventually be a meter instead of text. Make an ActionPointMeter Monobehaviour?
 	Color apTextOriginalColor;
+	long aiBeginStateFrame = 0;
 
 	MoveActionData moveActionData;
 
@@ -199,6 +203,9 @@ public class Battle : MonoBehaviour{
 			this.teams.Add(team);
 			team.mechs = new List<BattleMech>();
 			team.isPlayer = teamData.isPlayer;
+			if(team.isPlayer == false){
+				team.ai = new BattleTeamAi(team);
+			}
 			team.visibleTiles = new bool[this.tiles.Length];
 
 			foreach(BattleStartData.Mech m in teamData.mechs){
@@ -214,6 +221,10 @@ public class Battle : MonoBehaviour{
 				Assert.IsTrue(tile.mech == null);
 				tile.mech = mech;
 				mech.tile = tile;
+
+				if(team.isPlayer == false){
+					mech.ai = new BattleMechAi(mech);
+				}
 
 				this.pathNetwork.SetNodeEnabled(tile, false);
 
@@ -265,7 +276,11 @@ public class Battle : MonoBehaviour{
 
 		this.UpdateFogOfWar();
 
-		this.SetState(BattleState.SelectingAction);
+		if(this.currentTeam.isPlayer){
+			this.SetState(BattleState.SelectingAction);
+		}else{
+			this.SetState(BattleState.AiControl);
+		}
 	}
 
 	void Update(){
@@ -273,7 +288,8 @@ public class Battle : MonoBehaviour{
 			float cameraSizeY = this.gameCamera.orthographicSize;
 			float mouseRatioX = Input.GetAxis("Mouse X") / (float)Screen.height;
 			float mouseRatioY = Input.GetAxis("Mouse Y") / (float)Screen.height;
-			// I don't know why 4 and 8 work but they do ¯\_(ツ)_/¯
+			// I don't know why 4 and 8 work but they do ¯\_(ツ)_/¯ (except the speed is doubled in WebGL builds for
+			// some reason... wait, does it think the screen height is the browser window height???)
 			Vector3 newPos = this.cameraPivot.transform.position + new Vector3(
 				mouseRatioX * cameraSizeY * -4f,
 				0f,
@@ -333,6 +349,17 @@ public class Battle : MonoBehaviour{
 		}
 	}
 
+	void FixedUpdate(){
+		if(this.state == BattleState.AiControl){
+			float aiUpdateEverySeconds = 1f;
+			int aiUpdateInterval = (int)(aiUpdateEverySeconds / (float)Time.fixedDeltaTime);
+
+			if(Game.fixedFrameCount - this.aiBeginStateFrame >= aiUpdateInterval){
+				this.currentTeam.ai.Update();
+			}
+		}
+	}
+
 	public HexTile GetTile(int index){
 		return this.tiles[index];
 	}
@@ -386,7 +413,8 @@ public class Battle : MonoBehaviour{
 
 	// Note: this will be used for replays and maybe save files, so only use data from the move data
 	// and the current state of the map.
-	void ExecuteMove(object o){
+	// Hmmmm, this is starting to seem very independent from the rest of this file.
+	public void ExecuteMove(object o){
 		if(o.GetType() == typeof(BattleMove.Move)){
 			var move = (BattleMove.Move)o;
 
@@ -491,7 +519,6 @@ public class Battle : MonoBehaviour{
 			}
 		}
 
-		// Temporary stuff because no AI
 		this.UpdateFogOfWar();
 	}
 
@@ -512,7 +539,7 @@ public class Battle : MonoBehaviour{
 
 		HexTile tile = mechToDestroy.tile;
 
-		// Remove the mech and all references to it (such as targets).
+		// Remove the mech and all references to it (such as teams and targets).
 
 		tile.mech = null;
 
@@ -582,8 +609,8 @@ public class Battle : MonoBehaviour{
 		}
 	}
 
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// State-dependent behaviour
 
 	public void SetState(BattleState newState){
@@ -591,7 +618,8 @@ public class Battle : MonoBehaviour{
 			Debug.Log("Ending state " + this.state);
 		}
 
-		if(this.state == BattleState.SelectingAction){
+		if(this.state == BattleState.AiControl){
+			
 		}else if(this.state == BattleState.MoveAction){
 			if(this.moveActionData.ghostMechs != null){
 				foreach(GameObject go in this.moveActionData.ghostMechs){
@@ -609,15 +637,32 @@ public class Battle : MonoBehaviour{
 			}
 
 			this.ResetActionPointsPreview();
-		}else if(this.state == BattleState.SetTargetAction){
-
 		}
 
 		this.state = newState;
 
 		Debug.Log("Beginning state " + this.state);
 
-		if(this.state == BattleState.SelectingAction){
+		if(this.state == BattleState.EndOfAction){
+			if(this.currentTeam.isPlayer){
+				this.SetState(BattleState.SelectingAction);
+			}else{
+				this.SetState(BattleState.AiControl);
+			}
+		}else if(this.state == BattleState.AiControl){
+			this.aiBeginStateFrame = Game.fixedFrameCount;
+
+			this.hoveredTile = null;
+			this.selectedTile = null;
+
+			this.selectedTileGO.SetActive(false);
+			this.hoveredTileGO.SetActive(false);
+
+			this.SetMenusUsable(false);
+			// TODO: ugh, this is AWFUL
+			this.AdjustTileInfoTabButtonGraphics();
+			this.UpdateRightPanel();
+		}else if(this.state == BattleState.SelectingAction){
 			this.HexTileHovered();
 
 			this.SetMenusUsable(true);
@@ -633,13 +678,15 @@ public class Battle : MonoBehaviour{
 			this.SetMenusUsable(false);
 		}else if(this.state == BattleState.SetTargetAction){
 			this.SetMenusUsable(false);
-		}else{
-			throw new UnityException();
 		}
 	}
 
 	void HexTileHovered(){
-		if(this.state == BattleState.MoveAction){
+		bool isHoveredTileGOActive = this.hoveredTile != null;
+
+		if(this.state == BattleState.AiControl){
+			isHoveredTileGOActive = false;
+		}else if(this.state == BattleState.MoveAction){
 			foreach(GameObject go in this.moveActionData.ghostMechs){
 				Destroy(go);
 			}
@@ -725,11 +772,15 @@ public class Battle : MonoBehaviour{
 
 		end:
 
-		var mr = this.hoveredTileGO.GetComponent<MeshRenderer>();
-		if(this.CanClickTile()){
-			mr.sharedMaterial = Resources.Load<Material>("Materials/Hovered tile");
-		}else{
-			mr.sharedMaterial = Resources.Load<Material>("Materials/Hovered tile invalid");
+		this.hoveredTileGO.SetActive(isHoveredTileGOActive);
+		if(isHoveredTileGOActive){
+			this.hoveredTile.AttachForeground(this.hoveredTileGO.transform, 2);
+			var mr = this.hoveredTileGO.GetComponent<MeshRenderer>();
+			if(this.CanClickTile()){
+				mr.sharedMaterial = Resources.Load<Material>("Materials/Hovered tile");
+			}else{
+				mr.sharedMaterial = Resources.Load<Material>("Materials/Hovered tile invalid");
+			}
 		}
 	}
 
@@ -775,7 +826,7 @@ public class Battle : MonoBehaviour{
 				this.CanTeamSeeTile(this.selectedTile.mech.team, tile)
 			);
 		}else{
-			throw new UnityException();
+			return false;
 		}
 	}
 
@@ -834,9 +885,9 @@ public class Battle : MonoBehaviour{
 				this.UpdateTargetTile(this.selectedTile.mech);
 				this.UpdateRightPanel();
 
-				this.SetState(BattleState.SelectingAction);
+				this.SetState(BattleState.EndOfAction);
 			}else{
-				this.SetState(BattleState.SelectingAction);
+				this.SetState(BattleState.EndOfAction);
 			}
 		}else if(this.state == BattleState.SetTargetAction){
 			BattleMech mech = this.selectedTile.mech;
@@ -854,7 +905,7 @@ public class Battle : MonoBehaviour{
 
 			this.UpdateRightPanel();
 
-			this.SetState(BattleState.SelectingAction);
+			this.SetState(BattleState.EndOfAction);
 		}
 	}
 
@@ -865,14 +916,14 @@ public class Battle : MonoBehaviour{
 		if(this.state == BattleState.SelectingAction){
 			// Attack selected mech maybe?
 		}else if(this.state == BattleState.MoveAction){
-			this.SetState(BattleState.SelectingAction);
+			this.SetState(BattleState.EndOfAction);
 		}else if(this.state == BattleState.SetTargetAction){
-			this.SetState(BattleState.SelectingAction);
+			this.SetState(BattleState.EndOfAction);
 		}
 	}
 
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Event-like functions
 
 	public enum MouseEventType{
@@ -901,25 +952,14 @@ public class Battle : MonoBehaviour{
 		}
 
 		if(newHoveredTile != this.hoveredTile){
-			if(this.hoveredTile){
-				// Stopped hovering this tile.
-
-				this.hoveredTileGO.SetActive(false);
-			}
 			this.hoveredTile = newHoveredTile;
-			if(this.hoveredTile){
-				// Started hovering this tile.
-
-				this.hoveredTile.AttachForeground(this.hoveredTileGO.transform, 2);
-				this.hoveredTileGO.SetActive(true);
-			}
 
 			this.HexTileHovered();
 		}
 	}
 
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// UI functions
 
 	void SetMenusUsable(bool usable){
@@ -1046,6 +1086,7 @@ public class Battle : MonoBehaviour{
 	void UnitListButtonPressed(Button button){
 		if(button == this.uiRefs.finishTurnButton){
 			this.AdvanceTurn();
+			this.SetState(BattleState.EndOfAction);
 		}
 	}
 
@@ -1083,6 +1124,8 @@ public class Battle : MonoBehaviour{
 
 			float newAP = mech.actionPoints - mech.GetAPCostForStandingFire().ap;
 			this.UpdateActionPointsPreview(newAP);
+
+			this.SetState(BattleState.EndOfAction);
 		}
 	}
 
