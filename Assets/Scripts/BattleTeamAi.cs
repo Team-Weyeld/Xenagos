@@ -11,6 +11,7 @@ public class BattleTeamAi{
 
 	public void Update(){
 		foreach(BattleMech mech in this.ourTeam.mechs){
+			// For now, the commander's command is always to destroy the enemy mech
 			mech.ai.Update();
 		}
 	}

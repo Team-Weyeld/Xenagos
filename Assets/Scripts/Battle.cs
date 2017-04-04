@@ -418,6 +418,12 @@ public class Battle : MonoBehaviour{
 		if(o.GetType() == typeof(BattleMove.Move)){
 			var move = (BattleMove.Move)o;
 
+			Assert.IsTrue(
+				this.GetTile(move.mechIndex).mech != null &&
+				this.GetTile(move.newIndex).mech == null &&
+				(move.isFiring == false || this.GetTile(move.targetMechIndex).mech != null)
+			);
+
 			BattleMech mech = this.GetTile(move.mechIndex).mech;
 			BattleMech targetMech = move.isFiring ? this.GetTile(move.targetMechIndex).mech : null;
 			HexTile fromTile = mech.tile;
@@ -467,6 +473,11 @@ public class Battle : MonoBehaviour{
 		}else if(o.GetType() == typeof(BattleMove.StandingFire)){
 			var move = (BattleMove.StandingFire)o;
 
+			Assert.IsTrue(
+				this.GetTile(move.mechIndex).mech != null &&
+				this.GetTile(move.targetMechIndex).mech != null
+			);
+
 			BattleMech mech = this.GetTile(move.mechIndex).mech;
 			BattleMech targetMech = this.GetTile(move.targetMechIndex).mech;
 
@@ -476,6 +487,11 @@ public class Battle : MonoBehaviour{
 			mech.actionPoints -= apCostResult.ap;
 		}else if(o.GetType() == typeof(BattleMove.SetTarget)){
 			var move = (BattleMove.SetTarget)o;
+
+			Assert.IsTrue(
+				this.GetTile(move.mechIndex).mech != null &&
+				(move.hasTarget == false || this.GetTile(move.targetMechIndex).mech != null)
+			);
 
 			BattleMech mech = this.GetTile(move.mechIndex).mech;
 
