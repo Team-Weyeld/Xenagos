@@ -22,7 +22,15 @@ public struct BattleStartData{
 		public Color color;
 		public bool isPlayer;
 	}
+		
+	public Team[] teams;
+	public int startingTeamIndex;
+//	[HideInInspector]
+	public BattleMap map;
+}
 
+[System.Serializable]
+public struct BattleMap{
 	[System.Serializable]
 	public struct TileOverride{
 		public int posX;
@@ -30,9 +38,7 @@ public struct BattleStartData{
 		public string name;
 	}
 
-	public Vector2i mapSize;
-	public Team[] teams;
-	public int startingTeamIndex;
+	public Vector2i size;
 	public string baseTileName;
 	public TileOverride[] tileOverrides;
 }

@@ -112,9 +112,9 @@ public class Battle : MonoBehaviour{
 			this.backgroundGO = (GameObject)Instantiate(Resources.Load("Prefabs/Square collider"));
 			this.backgroundGO.name = "Background plane";
 			this.backgroundGO.transform.parent = this.worldGO.transform;
-			float scale = 5f * Mathf.Max(startData.mapSize.x, startData.mapSize.y);
+			float scale = 5f * Mathf.Max(startData.map.size.x, startData.map.size.y);
 			this.backgroundGO.transform.localScale = Vector3.one * scale;
-			Vector3 pos = new Vector3(startData.mapSize.x, -1f, startData.mapSize.y);
+			Vector3 pos = new Vector3(startData.map.size.x, -1f, startData.map.size.y);
 			pos *= 0.5f;
 			this.backgroundGO.transform.localPosition = pos;
 
@@ -153,18 +153,18 @@ public class Battle : MonoBehaviour{
 
 		// Build map.
 
-		this.mapSize = startData.mapSize;
+		this.mapSize = startData.map.size;
 		this.tiles = new HexTile[this.mapSize.x * this.mapSize.y];
-		TileData baseTileData = GameData.GetTile(startData.baseTileName);
+		TileData baseTileData = GameData.GetTile(startData.map.baseTileName);
 		TileData tileData = baseTileData;
 		this.pathNetwork = new PathNetwork();
-		for (int y = 0; y < startData.mapSize.y; ++y) {
-			for (int x = 0; x < startData.mapSize.x; ++x) {
+		for (int y = 0; y < startData.map.size.y; ++y) {
+			for (int x = 0; x < startData.map.size.x; ++x) {
 				GameObject go = new GameObject ("Hex tile");
 				go.transform.parent = this.mapGO.transform;
 
 				tileData = baseTileData;
-				foreach (var o in startData.tileOverrides) {
+				foreach (var o in startData.map.tileOverrides) {
 					if(o.posX == x && o.posY == y){
 						tileData = GameData.GetTile(o.name);
 						break;

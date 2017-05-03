@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 struct SerializedHistory{
 	public BattleStartData startData;
 	public int currentTeamIndex;
