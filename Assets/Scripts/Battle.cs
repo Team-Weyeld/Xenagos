@@ -74,12 +74,13 @@ public class Battle : MonoBehaviour{
 		this.mapGO = new GameObject ("Battle map");
 		this.mapGO.transform.parent = this.worldGO.transform;
 
-		this.history = new BattleHistory();
-		this.history.startData = battleHistory.startData;
-		this.history.currentTeamIndex = battleHistory.currentTeamIndex;
+		// Copy the history, except for the moves; they'll be applied later.
+		this.history = battleHistory;
+		List<object> moveHistory = battleHistory.moves;
 		this.history.moves = new List<object>();
 
-		BattleStartData startData = this.history.startData;
+		Scenario scenario = this.history.scenario;
+		BattleMap map = this.history.startingMap;
 
 		// Build misc objects.
 
@@ -112,9 +113,9 @@ public class Battle : MonoBehaviour{
 			this.backgroundGO = (GameObject)Instantiate(Resources.Load("Prefabs/Square collider"));
 			this.backgroundGO.name = "Background plane";
 			this.backgroundGO.transform.parent = this.worldGO.transform;
-			float scale = 5f * Mathf.Max(startData.map.size.x, startData.map.size.y);
+			float scale = 5f * Mathf.Max(map.size.x, map.size.y);
 			this.backgroundGO.transform.localScale = Vector3.one * scale;
-			Vector3 pos = new Vector3(startData.map.size.x, -1f, startData.map.size.y);
+			Vector3 pos = new Vector3(map.size.x, -1f, map.size.y);
 			pos *= 0.5f;
 			this.backgroundGO.transform.localPosition = pos;
 
@@ -153,18 +154,18 @@ public class Battle : MonoBehaviour{
 
 		// Build map.
 
-		this.mapSize = startData.map.size;
+		this.mapSize = map.size;
 		this.tiles = new HexTile[this.mapSize.x * this.mapSize.y];
-		TileData baseTileData = GameData.GetTile(startData.map.baseTileName);
+		TileData baseTileData = GameData.GetTile(map.baseTileName);
 		TileData tileData = baseTileData;
 		this.pathNetwork = new PathNetwork();
-		for (int y = 0; y < startData.map.size.y; ++y) {
-			for (int x = 0; x < startData.map.size.x; ++x) {
+		for (int y = 0; y < map.size.y; ++y) {
+			for (int x = 0; x < map.size.x; ++x) {
 				GameObject go = new GameObject ("Hex tile");
 				go.transform.parent = this.mapGO.transform;
 
 				tileData = baseTileData;
-				foreach (var o in startData.map.tileOverrides) {
+				foreach (var o in map.tileOverrides) {
 					if(o.posX == x && o.posY == y){
 						tileData = GameData.GetTile(o.name);
 						break;
@@ -194,14 +195,14 @@ public class Battle : MonoBehaviour{
 
 		this.teams = new List<BattleTeam>();
 
-		foreach(BattleStartData.Team teamData in startData.teams){
+		foreach(Scenario.Team teamData in scenario.teams){
 			BattleTeam team = new BattleTeam();
 			this.teams.Add(team);
 			team.mechs = new List<BattleMech>();
 			team.isPlayer = teamData.isPlayer;
 			team.visibleTiles = new bool[this.tiles.Length];
 
-			foreach(BattleStartData.Mech m in teamData.mechs){
+			foreach(Scenario.Mech m in teamData.mechs){
 				MechData mechData = GameData.GetMech(m.mechName);
 
 				HexTile tile = this.GetTile(m.pos.x, m.pos.y);
@@ -222,7 +223,7 @@ public class Battle : MonoBehaviour{
 			}
 		}
 			
-		this.currentTeamIndex = this.history.startData.startingTeamIndex;
+		this.currentTeamIndex = this.history.scenario.startingTeamIndex;
 		this.currentTeam = this.teams[this.currentTeamIndex];
 
 		// UI stuff.
@@ -254,7 +255,7 @@ public class Battle : MonoBehaviour{
 
 		// Execute any moves to start with.
 
-		foreach(object o in battleHistory.moves){
+		foreach(object o in moveHistory){
 			this.ExecuteMove(o);
 		}
 

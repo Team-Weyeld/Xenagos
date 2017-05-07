@@ -245,61 +245,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c93ee41bc75bee4c93c88aa762374b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testBattleStartData:
-    teams:
-    - mechs:
-      - mechName: Solais
-        pos:
-          x: 6
-          y: 6
-        direction: 0
-      color: {r: 0.891, g: 0.247698, b: 0.247698, a: 0}
-      isPlayer: 0
-    - mechs:
-      - mechName: Caliburn
-        pos:
-          x: 2
-          y: 2
-        direction: 1
-      color: {r: 0.20112453, g: 0.37175155, b: 0.9117647, a: 0}
-      isPlayer: 1
-    startingTeamIndex: 1
-    map:
-      size:
-        x: 8
-        y: 8
-      baseTileName: Grass
-      tileOverrides:
-      - posX: 3
-        posY: 5
-        name: Rock wall
-      - posX: 4
-        posY: 5
-        name: Rock wall
-      - posX: 5
-        posY: 4
-        name: Rock wall
-      - posX: 3
-        posY: 3
-        name: Trees
-      - posX: 5
-        posY: 7
-        name: Trees
-      - posX: 6
-        posY: 7
-        name: Trees
-      - posX: 7
-        posY: 7
-        name: Trees
-      - posX: 7
-        posY: 6
-        name: Trees
-      - posX: 5
-        posY: 6
-        name: Trees
-      - posX: 0
-        posY: 0
-        name: Trees
+  scenarioToLoad: OriginalTestScenario.json
 --- !u!4 &1324693376
 Transform:
   m_ObjectHideFlags: 0

@@ -1,0 +1,44 @@
+{
+	"map": "OriginalTestMap.json",
+	"startingTeamIndex": 0,
+	"teams": [
+		{
+			"color": {
+				"r": 0.1,
+				"g": 0.3,
+				"b": 1.0,
+				"a": 1.0
+			},
+			"isPlayer": true,
+			"mechs": [
+				{
+					"mechName": "Caliburn",
+					"pos": {
+						"x": 2,
+						"y": 2
+					},
+					"direction": 1
+				}
+			]
+		},
+		{
+			"color": {
+				"r": 0.9,
+				"g": 0.15,
+				"b": 0.15,
+				"a": 1.0
+			},
+			"isPlayer": false,
+			"mechs": [
+				{
+					"mechName": "Solais",
+					"pos": {
+						"x": 6,
+						"y": 6
+					},
+					"direction": 0
+				}
+			]
+		}
+	]
+}

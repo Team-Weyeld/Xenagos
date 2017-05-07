@@ -5,8 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Game : MonoBehaviour{
-	public BattleStartData testBattleStartData;
-	public string mapFileName = "TestMap.json";
+	public string scenarioToLoad = "OriginalTestScenario.json";
 
 	static Game instance;
 	long fixedFrameCount;
@@ -25,12 +24,24 @@ public class Game : MonoBehaviour{
 	void Start(){
 		Object.DontDestroyOnLoad(this.gameObject);
 
+		Scenario scenario;
+		{
+			string dir = "Scenarios/";
+			string jsonText = "";
+
+			using(StreamReader sr = new StreamReader(dir + this.scenarioToLoad)){
+				jsonText = sr.ReadToEnd();
+			}
+
+			scenario = JsonUtility.FromJson<Scenario>(jsonText);
+		}
+
 		BattleMap map;
 		{
 			string dir = "Maps/";
 			string jsonText = "";
 
-			using(StreamReader sr = new StreamReader(dir + this.mapFileName)){
+			using(StreamReader sr = new StreamReader(dir + scenario.map)){
 				jsonText = sr.ReadToEnd();
 			}
 
@@ -38,9 +49,9 @@ public class Game : MonoBehaviour{
 		}
 
 		BattleHistory battleHistory = new BattleHistory();
-		battleHistory.startData = this.testBattleStartData;
-		battleHistory.startData.map = map;
-		battleHistory.currentTeamIndex = 1;
+		battleHistory.scenario = scenario;
+		battleHistory.startingMap = map;
+		battleHistory.currentTeamIndex = scenario.startingTeamIndex;
 		battleHistory.moves = new List<object>();
 		Game.StartBattle(battleHistory);
 	}
