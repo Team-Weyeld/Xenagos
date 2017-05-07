@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 struct SerializedHistory{
-	public BattleStartData startData;
+	public Scenario scenario;
+	// scenario's map file name is not used because the map file could have been changed.
+	public BattleMap startingMap;
 	public int currentTeamIndex;
 	// This is really stupid and it makes the output really ugly but it's the easiest way because Unity's json utility
 	// is garbo.
@@ -13,17 +16,20 @@ struct SerializedHistory{
 
 [System.Serializable]
 public struct BattleHistory{
-	public BattleStartData startData;
+	public Scenario scenario;
+	public BattleMap startingMap;
 	public int currentTeamIndex;
 	public List<object> moves;
 
 	public string ToJSON(){
 		SerializedHistory output = new SerializedHistory();
-		output.startData = this.startData;
+
+		output.scenario = this.scenario;
+		output.startingMap = this.startingMap;
 		output.currentTeamIndex = this.currentTeamIndex;
+
 		output.moveTypeNames = new string[this.moves.Count];
 		output.jsonTextOfMoves = new string[this.moves.Count];
-
 		for(int n = 0; n < this.moves.Count; ++n){
 			object o = this.moves[n];
 
@@ -51,7 +57,8 @@ public struct BattleHistory{
 	public void FromJSON(string jsonText){
 		SerializedHistory input = JsonUtility.FromJson<SerializedHistory>(jsonText);
 
-		this.startData = input.startData;
+		this.scenario = input.scenario;
+		this.startingMap = input.startingMap;
 		this.currentTeamIndex = input.currentTeamIndex;
 
 		this.moves = new List<object>(input.jsonTextOfMoves.Length);

@@ -8,7 +8,8 @@ public enum MechDirection{
 }
 
 [System.Serializable]
-public struct BattleStartData{
+// Previously BattleStartData
+public struct Scenario{
 	[System.Serializable]
 	public struct Mech{
 		public string mechName;
@@ -23,6 +24,13 @@ public struct BattleStartData{
 		public bool isPlayer;
 	}
 
+	public Team[] teams;
+	public int startingTeamIndex;
+	public string map;
+}
+
+[System.Serializable]
+public struct BattleMap{
 	[System.Serializable]
 	public struct TileOverride{
 		public int posX;
@@ -30,9 +38,7 @@ public struct BattleStartData{
 		public string name;
 	}
 
-	public Vector2i mapSize;
-	public Team[] teams;
-	public int startingTeamIndex;
+	public Vector2i size;
 	public string baseTileName;
 	public TileOverride[] tileOverrides;
 }
