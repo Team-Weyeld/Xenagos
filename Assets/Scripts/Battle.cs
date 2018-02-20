@@ -1139,9 +1139,10 @@ public class Battle : MonoBehaviour{
 			this.UpdateRightPanel();
 			this.UpdateTargetTile(mech);
 
-			float newAP = mech.actionPoints - mech.GetAPCostForStandingFire().ap;
-			this.UpdateActionPointsPreview(newAP);
-
+			if(mech.target){
+				float newAP = mech.actionPoints - mech.GetAPCostForStandingFire().ap;
+				this.UpdateActionPointsPreview(newAP);
+			}
 			this.SetState(BattleState.EndOfAction);
 		}
 	}

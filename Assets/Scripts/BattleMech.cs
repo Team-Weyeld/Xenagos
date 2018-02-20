@@ -58,7 +58,7 @@ public class BattleMech : MonoBehaviour{
 			float mult2 = ((HexTile)tiles[n]).data.movementSpeedMult;
 			float speedMult = (mult1 + mult2) * 0.5f;
 
-			bool isFiring = this.fireAuto && this.target && this.battle.TestLOS(this.tile, this.target.tile);
+			bool isFiring = this.fireAuto && this.target && this.battle.TestLOS((HexTile)tiles[n], this.target.tile);
 
 			float movementCost = this.data.movementCost;
 			if(isFiring){
