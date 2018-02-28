@@ -4,12 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Assertions;
 
-public class BattleTile :
-	MonoBehaviour,
-	IPointerEnterHandler,
-	IPointerExitHandler,
-	IPointerClickHandler
-{
+public class BattleTile : MonoBehaviour{
 	public class BattleTileCollider : MonoBehaviour{
 		public BattleTile battleTile;
 	}
@@ -130,21 +125,5 @@ public class BattleTile :
 		}
 
 		this.battle.pathNetwork.SetNodeEnabled(this, this.data.allowsMovement);
-	}
-
-	public void OnPointerEnter(PointerEventData eventData){
-		this.battle.MouseEvent(this, Battle.MouseEventType.Enter);
-	}
-
-	public void OnPointerExit(PointerEventData eventData){
-		this.battle.MouseEvent(this, Battle.MouseEventType.Exit);
-	}
-
-	public void OnPointerClick(PointerEventData eventData){
-		if(eventData.button == PointerEventData.InputButton.Left){
-			this.battle.MouseEvent(this, Battle.MouseEventType.Click);
-		}else if(eventData.button == PointerEventData.InputButton.Right){
-			this.battle.MouseEvent(this, Battle.MouseEventType.RightClick);
-		}
 	}
 }

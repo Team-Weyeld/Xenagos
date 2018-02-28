@@ -4,7 +4,12 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Assertions;
 
-public class MapTile : MonoBehaviour{
+public class MapTile :
+	MonoBehaviour,
+	IPointerEnterHandler,
+	IPointerExitHandler,
+	IPointerClickHandler
+{
 	public static float depthSpacing = 0.01f;
 	public static float hexSpacingX = 1f;
 	public static float hexRadius = 1f / Mathf.Cos (2f * Mathf.PI / 12f) * hexSpacingX * 0.5f;
@@ -118,6 +123,22 @@ public class MapTile : MonoBehaviour{
 				this.transform.position + this.hexVerts[n],
 				this.transform.position + this.hexVerts[n2]
 			);
+		}
+	}
+
+	public void OnPointerEnter(PointerEventData eventData){
+		this.map.eventListener.MouseEvent(this, MapDisplay.MouseEventType.Enter);
+	}
+
+	public void OnPointerExit(PointerEventData eventData){
+		this.map.eventListener.MouseEvent(this, MapDisplay.MouseEventType.Exit);
+	}
+
+	public void OnPointerClick(PointerEventData eventData){
+		if(eventData.button == PointerEventData.InputButton.Left){
+			this.map.eventListener.MouseEvent(this, MapDisplay.MouseEventType.Click);
+		}else if(eventData.button == PointerEventData.InputButton.Right){
+			this.map.eventListener.MouseEvent(this, MapDisplay.MouseEventType.RightClick);
 		}
 	}
 }
