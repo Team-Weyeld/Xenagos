@@ -15,23 +15,22 @@ public class MapDisplay : MonoBehaviour {
 		RightClick,
 	}
 
-	public Vector2i size;
+	public GameObject worldGO;
 	public Camera gameCamera;
-	public Vector3 cameraDir;
-	public MapDisplayEventListener eventListener;
+	public Transform cameraPivot;
+	[HideInInspector] public Vector2i size;
+	[HideInInspector] public Vector3 cameraDir;
+	[HideInInspector] public MapDisplayEventListener eventListener;
 
 	MapTile[] tiles;
-	GameObject worldGO;
 	GameObject hoveredTileGO;
 	GameObject selectedTileGO;
 	GameObject targetTileGO;
 	GameObject backgroundGO;
 
-	public void Init(MapDisplayEventListener newListener, GameObject newWorldGO, Vector2i newSize, Camera newGameCamera){
+	public void Init(MapDisplayEventListener newListener, Vector2i newSize){
 		this.eventListener = newListener;
-		this.worldGO = newWorldGO;
 		this.size = newSize;
-		this.gameCamera = newGameCamera;
 
 		this.cameraDir = this.gameCamera.transform.rotation * Vector3.forward;
 
@@ -95,6 +94,21 @@ public class MapDisplay : MonoBehaviour {
 				}
 			});
 			eventTrigger.triggers.Add(entry);
+		}
+	}
+
+	void Update(){
+		if(hardInput.GetKey("Pan Camera")){
+			float cameraSizeY = this.gameCamera.orthographicSize;
+			float mouseRatioX = Input.GetAxis("Mouse X") / (float)Screen.height;
+			float mouseRatioY = Input.GetAxis("Mouse Y") / (float)Screen.height;
+			// I don't know why 4 and 8 work but they do ¯\_(ツ)_/¯
+			Vector3 newPos = this.cameraPivot.transform.position + new Vector3(
+				mouseRatioX * cameraSizeY * -4f,
+				0f,
+				mouseRatioY * cameraSizeY * -8f
+			);
+			this.cameraPivot.transform.position = newPos;
 		}
 	}
 

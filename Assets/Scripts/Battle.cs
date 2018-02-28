@@ -35,14 +35,12 @@ public class Battle :
 	MapDisplayEventListener
 {
 	public BattleUIRefs uiRefs;
+	public MapDisplay mapDisplay;
 	public GameObject worldGO;
 	public GameObject world2DGO;
-	public Camera gameCamera;
-	public Transform cameraPivot;
 	public bool visualFogOfWar = true;
 	public bool fogOfWar = true;
 	[HideInInspector] public Game game;
-	[HideInInspector] public MapDisplay mapDisplay;
 	[HideInInspector] public GameObject mapGO;
 	[HideInInspector] public float hexSpacingY;
 	[HideInInspector] public float hexRadius;
@@ -66,9 +64,6 @@ public class Battle :
 	public void Init(Game game, BattleHistory battleHistory){
 		this.game = game;
 
-		this.mapGO = new GameObject ("Battle map");
-		this.mapGO.transform.parent = this.worldGO.transform;
-
 		// Copy the history, except for the moves; they'll be applied later.
 		this.history = battleHistory;
 		List<object> moveHistory = battleHistory.moves;
@@ -77,8 +72,7 @@ public class Battle :
 		Scenario scenario = this.history.scenario;
 		BattleMap map = this.history.startingMap;
 
-		this.mapDisplay = this.mapGO.AddComponent<MapDisplay>();
-		this.mapDisplay.Init(this, this.worldGO, map.size, this.gameCamera);
+		this.mapDisplay.Init(this, map.size);
 
 		// Build misc objects.
 
@@ -216,19 +210,6 @@ public class Battle :
 	}
 
 	void Update(){
-		if(hardInput.GetKey("Pan Camera")){
-			float cameraSizeY = this.gameCamera.orthographicSize;
-			float mouseRatioX = Input.GetAxis("Mouse X") / (float)Screen.height;
-			float mouseRatioY = Input.GetAxis("Mouse Y") / (float)Screen.height;
-			// I don't know why 4 and 8 work but they do ¯\_(ツ)_/¯
-			Vector3 newPos = this.cameraPivot.transform.position + new Vector3(
-				mouseRatioX * cameraSizeY * -4f,
-				0f,
-				mouseRatioY * cameraSizeY * -8f
-			);
-			this.cameraPivot.transform.position = newPos;
-		}
-
 		if(hardInput.GetKeyDown("Test LOS")){
 			// Draw a LOS test line from the selected tile to all other tiles.
 
