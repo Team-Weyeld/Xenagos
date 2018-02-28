@@ -41,10 +41,6 @@ public class Battle :
 	public bool visualFogOfWar = true;
 	public bool fogOfWar = true;
 	[HideInInspector] public Game game;
-	[HideInInspector] public GameObject mapGO;
-	[HideInInspector] public float hexSpacingY;
-	[HideInInspector] public float hexRadius;
-	[HideInInspector] public float hexSideLength;
 	[HideInInspector] public Vector2i mapSize;
 	[HideInInspector] public PathNetwork pathNetwork;
 

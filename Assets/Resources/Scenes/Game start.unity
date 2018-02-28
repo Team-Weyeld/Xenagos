@@ -246,6 +246,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scenarioToLoad: OriginalTestScenario.json
+  loadMapEditorInstead: 1
 --- !u!4 &1324693376
 Transform:
   m_ObjectHideFlags: 0
