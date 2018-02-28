@@ -11,7 +11,7 @@ public class BattleMech : MonoBehaviour{
 
 	public Battle battle;
 	public MechData data;
-	public HexTile tile;
+	public BattleTile tile;
 	public float hp;
 	public float maxActionPoints;
 	public float actionPoints;
@@ -33,7 +33,7 @@ public class BattleMech : MonoBehaviour{
 		this.fireAuto = true;
 		this.isDestroyed = false;
 
-		this.spriteGO = this.battle.CreateSprite(this.data.sprite, this.transform);
+		this.spriteGO = this.battle.mapDisplay.CreateSprite(this.data.sprite, this.transform);
 		this.spriteGO.name = "Mech sprite";
 		// Gotta figure out how to do this properly, maybe shift the sprites pixels up in the image?
 //		this.spriteGO.transform.localPosition = new Vector3(0f, 0f, -0.2f);
@@ -53,8 +53,8 @@ public class BattleMech : MonoBehaviour{
 				apUsedToSecondLast = apUsedTotal;
 			}
 
-			float mult1 = ((HexTile)tiles[n - 1]).data.movementSpeedMult;
-			float mult2 = ((HexTile)tiles[n]).data.movementSpeedMult;
+			float mult1 = ((BattleTile)tiles[n - 1]).data.movementSpeedMult;
+			float mult2 = ((BattleTile)tiles[n]).data.movementSpeedMult;
 			float speedMult = (mult1 + mult2) * 0.5f;
 
 			bool isFiring = this.fireAuto && this.target && this.battle.TestLOS(this.tile, this.target.tile);
@@ -93,7 +93,7 @@ public class BattleMech : MonoBehaviour{
 	}
 
 	public GameObject CreateGhost(MechDirection direction){
-		GameObject go = this.battle.CreateSprite(this.data.sprite);
+		GameObject go = this.battle.mapDisplay.CreateSprite(this.data.sprite);
 		go.name = "Spooky ghost mech";
 
 		float scaleX = direction == MechDirection.Right ? -1f : 1f;
