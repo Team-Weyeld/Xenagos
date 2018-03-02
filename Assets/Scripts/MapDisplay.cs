@@ -34,18 +34,6 @@ public class MapDisplay : MonoBehaviour {
 
 		this.cameraDir = this.gameCamera.transform.rotation * Vector3.forward;
 
-		this.tiles = new MapTile[this.size.x * this.size.y];
-		for (int y = 0; y < this.size.y; ++y) {
-			for (int x = 0; x < this.size.x; ++x) {
-				GameObject go = new GameObject ("MapTile");
-				go.transform.parent = this.transform;
-
-				MapTile newTile = go.AddComponent<MapTile>();
-				newTile.Init(this, new Vector2i(x, y));
-				this.tiles[x + y * this.size.x] = newTile;
-			}
-		}
-
 		{
 			this.hoveredTileGO = new GameObject("Hovered tile");
 			this.hoveredTileGO.SetActive(false);
@@ -95,6 +83,9 @@ public class MapDisplay : MonoBehaviour {
 			});
 			eventTrigger.triggers.Add(entry);
 		}
+
+		this.tiles = new MapTile[0];
+		this.Recreate(newSize);
 	}
 
 	void Update(){
@@ -116,6 +107,30 @@ public class MapDisplay : MonoBehaviour {
 		return this.tiles[pos.x + pos.y * this.size.x];
 	}
 
+	public void Recreate(Vector2i newSize){
+		this.DisableHoveredTile();
+		this.DisableSelectedTile();
+		this.DisableTargetTile();
+
+		foreach(MapTile tile in this.tiles){
+			Destroy(tile.gameObject);
+		}
+
+		this.size = newSize;
+
+		this.tiles = new MapTile[this.size.x * this.size.y];
+		for (int y = 0; y < this.size.y; ++y) {
+			for (int x = 0; x < this.size.x; ++x) {
+				GameObject go = new GameObject("MapTile");
+				go.transform.parent = this.transform;
+
+				MapTile newTile = go.AddComponent<MapTile>();
+				newTile.Init(this, new Vector2i(x, y));
+				this.tiles[x + y * this.size.x] = newTile;
+			}
+		}
+	}
+
 	// Hovered tile
 	public void SetHoveredTile(MapTile tile){
 		tile.AttachForeground(this.hoveredTileGO.transform, 2);
@@ -131,6 +146,7 @@ public class MapDisplay : MonoBehaviour {
 	}
 	public void DisableHoveredTile(){
 		this.hoveredTileGO.SetActive(false);
+		this.hoveredTileGO.transform.parent = null;
 	}
 
 	// Selected tile
@@ -140,6 +156,7 @@ public class MapDisplay : MonoBehaviour {
 	}
 	public void DisableSelectedTile(){
 		this.selectedTileGO.SetActive(false);
+		this.selectedTileGO.transform.parent = null;
 	}
 
 	// Target tile
@@ -149,6 +166,7 @@ public class MapDisplay : MonoBehaviour {
 	}
 	public void DisableTargetTile(){
 		this.targetTileGO.SetActive(false);
+		this.targetTileGO.transform.parent = null;
 	}
 
 	public GameObject CreateSprite(Sprite sprite, Transform parent = null){

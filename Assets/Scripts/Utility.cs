@@ -57,4 +57,11 @@ static class Utility{
 		});
 		eventTrigger.triggers.Add(entry);
 	}
+
+	public delegate void InputFieldCallbackFunction(InputField inputField);
+	public static void AddInputFieldChangedListener(InputField inputField, InputFieldCallbackFunction callback){
+		inputField.onEndEdit.AddListener((ifield) => {
+			callback(inputField);
+		});
+	}
 }

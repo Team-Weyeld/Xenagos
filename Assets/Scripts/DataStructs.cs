@@ -40,7 +40,7 @@ public struct BattleMap{
 
 	public Vector2i size;
 	public string baseTileName;
-	public TileOverride[] tileOverrides;
+	public List<TileOverride> tileOverrides;
 }
 
 public static class BattleMove{

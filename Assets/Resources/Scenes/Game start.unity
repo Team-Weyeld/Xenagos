@@ -192,15 +192,15 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
       propertyPath: inputs.Array.data[1].primaryKeycode
-      value: 49
+      value: 282
       objectReference: {fileID: 0}
     - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
       propertyPath: inputs.Array.data[2].primaryKeycode
-      value: 50
+      value: 283
       objectReference: {fileID: 0}
     - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
       propertyPath: inputs.Array.data[3].primaryKeycode
-      value: 51
+      value: 284
       objectReference: {fileID: 0}
     - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
       propertyPath: inputs.Array.data[4].keyName
@@ -208,7 +208,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11428236, guid: 12435612b18feef45904aa3e14fe7580, type: 2}
       propertyPath: inputs.Array.data[4].primaryKeycode
-      value: 52
+      value: 285
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 12435612b18feef45904aa3e14fe7580, type: 2}

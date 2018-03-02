@@ -791,7 +791,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 8
+  m_Text: 12
 --- !u!222 &776167525
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -956,7 +956,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 8
+  m_Text: 34
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -1089,7 +1089,7 @@ MonoBehaviour:
   m_CaretColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_CustomCaretColor: 0
   m_SelectionColor: {r: 0.65882355, g: 0.80784315, b: 1, a: 0.7529412}
-  m_Text: 8
+  m_Text: 12
   m_CaretBlinkRate: 0.85
   m_CaretWidth: 1
   m_ReadOnly: 0
@@ -1487,15 +1487,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18689fc7436cfa24ba2c812a07c0e55c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiRefs: {fileID: 0}
+  uiRefs: {fileID: 1737862094}
   mapDisplay: {fileID: 2037975462}
   defaultMap:
     size:
       x: 8
       y: 8
     baseTileName: Grass
-    tileOverrides: []
-  game: {fileID: 0}
+    tileOverrides:
+    - posX: 1
+      posY: 0
+      name: Trees
+    - posX: 6
+      posY: 0
+      name: Trees
 --- !u!4 &1737862093
 Transform:
   m_ObjectHideFlags: 0
@@ -1521,6 +1526,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canvas: {fileID: 595827047}
+  sizeXTextbox: {fileID: 1126148037}
+  sizeYTextbox: {fileID: 1090611409}
   undoButton: {fileID: 1552450896}
   redoButton: {fileID: 1317610581}
   selectNoneButton: {fileID: 1399450450}
@@ -1852,7 +1859,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 8
+  m_Text: 34
 --- !u!222 &2120571513
 CanvasRenderer:
   m_ObjectHideFlags: 0
