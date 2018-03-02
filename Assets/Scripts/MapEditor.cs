@@ -3,18 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+
 public class MapEditor :
 	MonoBehaviour,
 	MapDisplayEventListener
 {
+	public MapEditorUIRefs uiRefs;
 	public MapDisplay mapDisplay;
 	public BattleMap defaultMap;
-	[HideInInspector] public Game game;
+	// [HideInInspector] public Game game;
 
 	BattleMap map;
 
 	void Start(){
-		this.game = GameObject.Find("Game").GetComponent<Game>();
+		// this.game = GameObject.Find("Game").GetComponent<Game>();
 
 		this.map = this.defaultMap;
 
