@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 public interface MapDisplayEventListener{
@@ -15,6 +17,8 @@ public class MapDisplay : MonoBehaviour {
 		RightClick,
 		ClickDown,
 		ClickUp,
+		RightClickDown,
+		RightClickUp,
 	}
 
 	public GameObject worldGO;
@@ -76,40 +80,37 @@ public class MapDisplay : MonoBehaviour {
 
 			EventTrigger eventTrigger = this.backgroundGO.AddComponent<EventTrigger>();
 
-			{
+			Action<EventTriggerType, UnityAction<BaseEventData>> addEventThing = (etType, callback) => {
 				var entry = new EventTrigger.Entry();
-				entry.eventID = EventTriggerType.PointerClick;
-				entry.callback.AddListener((data) => {
-					var button = ((PointerEventData)data).button;
-					if(button == PointerEventData.InputButton.Left){
-						this.eventListener.MouseEvent(null, MouseEventType.Click);
-					}else if(button == PointerEventData.InputButton.Right){
-						this.eventListener.MouseEvent(null, MouseEventType.RightClick);
-					}
-				});
+				entry.eventID = etType;
+				entry.callback.AddListener(callback);
 				eventTrigger.triggers.Add(entry);
-			}
+			};
 
-			{
-				var entry = new EventTrigger.Entry();
-				entry.eventID = EventTriggerType.PointerDown;
-				entry.callback.AddListener((data) => {
-					if(((PointerEventData)data).button == PointerEventData.InputButton.Left){
-						this.eventListener.MouseEvent(null, MouseEventType.ClickDown);
-					}
-				});
-				eventTrigger.triggers.Add(entry);
-			}
-			{
-				var entry = new EventTrigger.Entry();
-				entry.eventID = EventTriggerType.PointerUp;
-				entry.callback.AddListener((data) => {
-					if(((PointerEventData)data).button == PointerEventData.InputButton.Left){
-						this.eventListener.MouseEvent(null, MouseEventType.ClickUp);
-					}
-				});
-				eventTrigger.triggers.Add(entry);
-			}
+			addEventThing(EventTriggerType.PointerClick, (data) => {
+				var button = ((PointerEventData)data).button;
+				if(button == PointerEventData.InputButton.Left){
+					this.eventListener.MouseEvent(null, MouseEventType.Click);
+				}else if(button == PointerEventData.InputButton.Right){
+					this.eventListener.MouseEvent(null, MouseEventType.RightClick);
+				}
+			});
+			addEventThing(EventTriggerType.PointerDown, (data) => {
+				var button = ((PointerEventData)data).button;
+				if(button == PointerEventData.InputButton.Left){
+					this.eventListener.MouseEvent(null, MouseEventType.ClickDown);
+				}else if(button == PointerEventData.InputButton.Right){
+					this.eventListener.MouseEvent(null, MouseEventType.RightClickDown);
+				}
+			});
+			addEventThing(EventTriggerType.PointerUp, (data) => {
+				var button = ((PointerEventData)data).button;
+				if(button == PointerEventData.InputButton.Left){
+					this.eventListener.MouseEvent(null, MouseEventType.ClickUp);
+				}else if(button == PointerEventData.InputButton.Right){
+					this.eventListener.MouseEvent(null, MouseEventType.RightClickUp);
+				}
+			});
 		}
 
 		this.tiles = new MapTile[0];

@@ -147,12 +147,16 @@ public class MapTile :
 	public void OnPointerDown(PointerEventData eventData){
 		if(eventData.button == PointerEventData.InputButton.Left){
 			this.map.eventListener.MouseEvent(this, MapDisplay.MouseEventType.ClickDown);
+		}else if(eventData.button == PointerEventData.InputButton.Right){
+			this.map.eventListener.MouseEvent(this, MapDisplay.MouseEventType.RightClickDown);
 		}
 	}
 
 	public void OnPointerUp(PointerEventData eventData){
 		if(eventData.button == PointerEventData.InputButton.Left){
 			this.map.eventListener.MouseEvent(this, MapDisplay.MouseEventType.ClickUp);
+		}else if(eventData.button == PointerEventData.InputButton.Right){
+			this.map.eventListener.MouseEvent(this, MapDisplay.MouseEventType.RightClickUp);
 		}
 	}
 }

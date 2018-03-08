@@ -7,7 +7,6 @@ using UnityEngine.UI;
 abstract class BaseHistoryEvent{
 	
 }
-
 class ResizeHistoryEvent : BaseHistoryEvent{
 	public Vector2i oldSize;
 	public Vector2i newSize;
@@ -17,6 +16,7 @@ class ResizeHistoryEvent : BaseHistoryEvent{
 enum MapEditorState{
 	Normal,
 	SelectionPaint,
+	SelectionErase,
 }
 
 public class MapEditor :
@@ -119,6 +119,14 @@ public class MapEditor :
 				this.selectedTiles.Add(this.lastEnteredTile);
 				this.mapDisplay.SetSelectedTiles(this.selectedTiles);
 			}
+		}else if(newState == MapEditorState.SelectionErase){
+			if(
+				this.lastEnteredTile != null &&
+				this.selectedTiles.Contains(this.lastEnteredTile) == true
+			){
+				this.selectedTiles.Remove(this.lastEnteredTile);
+				this.mapDisplay.SetSelectedTiles(this.selectedTiles);
+			}
 		}
 
 		this.UpdateUI();
@@ -143,6 +151,11 @@ public class MapEditor :
 					this.selectedTiles.Add(tile);
 					this.mapDisplay.SetSelectedTiles(this.selectedTiles);
 				}
+			}else if(this.state == MapEditorState.SelectionErase){
+				if(tile && this.selectedTiles.Contains(tile) == true){
+					this.selectedTiles.Remove(tile);
+					this.mapDisplay.SetSelectedTiles(this.selectedTiles);
+				}
 			}
 		}else if(eventType == MapDisplay.MouseEventType.Exit){
 			this.lastEnteredTile = null;
@@ -154,6 +167,14 @@ public class MapEditor :
 			}
 		}else if(eventType == MapDisplay.MouseEventType.ClickUp){
 			if(this.state == MapEditorState.SelectionPaint){
+				this.SetState(MapEditorState.Normal);
+			}
+		}else if(eventType == MapDisplay.MouseEventType.RightClickDown){
+			if(this.state == MapEditorState.Normal){
+				this.SetState(MapEditorState.SelectionErase);
+			}
+		}else if(eventType == MapDisplay.MouseEventType.RightClickUp){
+			if(this.state == MapEditorState.SelectionErase){
 				this.SetState(MapEditorState.Normal);
 			}
 		}
@@ -215,7 +236,7 @@ public class MapEditor :
 
 		this.uiRefs.selectedTilesPanel.SetActive(
 			this.selectedTiles.Count > 0 &&
-			this.state != MapEditorState.Normal
+			this.state == MapEditorState.Normal
 		);
 	}
 
