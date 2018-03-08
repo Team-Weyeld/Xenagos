@@ -11,6 +11,7 @@ abstract class BaseHistoryEvent{
 class ResizeHistoryEvent : BaseHistoryEvent{
 	public Vector2i oldSize;
 	public Vector2i newSize;
+	public List<BattleMap.TileOverride> removedTiles;
 }
 
 public class MapEditor :
@@ -35,7 +36,7 @@ public class MapEditor :
 
 		this.mapDisplay.Init(this, this.map.size);
 
-		this.RebuildMap();
+		this.RebuildMapDisplay();
 
 		// UI stuff
 
@@ -48,7 +49,7 @@ public class MapEditor :
 		Utility.AddButtonClickListener(this.uiRefs.redoButton, this.UndoRedoButtonPressed);
 	}
 
-	void RebuildMap(){
+	void RebuildMapDisplay(){
 		this.mapDisplay.Recreate(this.map.size);
 
 		TileData baseTileData = GameData.GetTile(this.map.baseTileName);
@@ -69,7 +70,9 @@ public class MapEditor :
 		}
 	}
 
-	void ResizeMap(Vector2i newSize){
+	List<BattleMap.TileOverride> ResizeMap(Vector2i newSize){
+		var removedTiles = new List<BattleMap.TileOverride>();
+
 		this.map.size = newSize;
 
 		for(int n = this.map.tileOverrides.Count; n --> 0;){
@@ -78,12 +81,12 @@ public class MapEditor :
 				this.map.tileOverrides[n].posY >= newSize.y
 			);
 			if(isOutsideBounds){
+				removedTiles.Add(this.map.tileOverrides[n]);
 				this.map.tileOverrides.RemoveAt(n);
 			}
 		}
 
-
-		this.RebuildMap();
+		return removedTiles;
 	}
 
 	public void MouseEvent(MapTile mapTile, MapDisplay.MouseEventType eventType){
@@ -125,7 +128,8 @@ public class MapEditor :
 	void DoHistoryEvent(BaseHistoryEvent baseHistoryEvent){
 		if(baseHistoryEvent.GetType() == typeof(ResizeHistoryEvent)){
 			var resizeHistoryEvent = (ResizeHistoryEvent)baseHistoryEvent;
-			this.ResizeMap(resizeHistoryEvent.newSize);
+			resizeHistoryEvent.removedTiles = this.ResizeMap(resizeHistoryEvent.newSize);
+			this.RebuildMapDisplay();
 		}
 	}
 
@@ -133,6 +137,10 @@ public class MapEditor :
 		if(baseHistoryEvent.GetType() == typeof(ResizeHistoryEvent)){
 			var resizeHistoryEvent = (ResizeHistoryEvent)baseHistoryEvent;
 			this.ResizeMap(resizeHistoryEvent.oldSize);
+			foreach(var tileOverride in resizeHistoryEvent.removedTiles){
+				this.map.tileOverrides.Add(tileOverride);
+			}
+			this.RebuildMapDisplay();
 		}
 	}
 
