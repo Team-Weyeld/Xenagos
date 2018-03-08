@@ -24,28 +24,28 @@ public class MapEditor :
 
 	BattleMap map;
 	LinkedList<BaseHistoryEvent> historyEvents;
+	LinkedListNode<BaseHistoryEvent> lastHistoryEventNode;
 
 	void Start(){
 		// this.game = GameObject.Find("Game").GetComponent<Game>();
 
 		this.map = this.defaultMap;
 		this.historyEvents = new LinkedList<BaseHistoryEvent>();
+		this.lastHistoryEventNode = null;
 
 		this.mapDisplay.Init(this, this.map.size);
 
 		this.RebuildMap();
 
-
 		// UI stuff
 
-		this.uiRefs.sizeXTextbox.text = this.map.size.x.ToString();
-		this.uiRefs.sizeYTextbox.text = this.map.size.y.ToString();
-
-		this.uiRefs.undoButton.interactable = false;
-		this.uiRefs.redoButton.interactable = false;
+		this.UpdateUI();
 
 		Utility.AddInputFieldChangedListener(this.uiRefs.sizeXTextbox, this.InputFieldChanged);
 		Utility.AddInputFieldChangedListener(this.uiRefs.sizeYTextbox, this.InputFieldChanged);
+
+		Utility.AddButtonClickListener(this.uiRefs.undoButton, this.UndoRedoButtonPressed);
+		Utility.AddButtonClickListener(this.uiRefs.redoButton, this.UndoRedoButtonPressed);
 	}
 
 	void RebuildMap(){
@@ -111,8 +111,15 @@ public class MapEditor :
 	// HistoryEvent functions
 
 	void AddNewHistoryEvent(BaseHistoryEvent baseHistoryEvent){
-		this.historyEvents.AddLast(baseHistoryEvent);
+		while(this.historyEvents.Last != this.lastHistoryEventNode){
+			this.historyEvents.RemoveLast();
+		}
+
+		this.lastHistoryEventNode = this.historyEvents.AddLast(baseHistoryEvent);
+
 		this.DoHistoryEvent(baseHistoryEvent);
+
+		this.UpdateUI();
 	}
 
 	void DoHistoryEvent(BaseHistoryEvent baseHistoryEvent){
@@ -122,9 +129,29 @@ public class MapEditor :
 		}
 	}
 
+	void UndoHistoryEvent(BaseHistoryEvent baseHistoryEvent){
+		if(baseHistoryEvent.GetType() == typeof(ResizeHistoryEvent)){
+			var resizeHistoryEvent = (ResizeHistoryEvent)baseHistoryEvent;
+			this.ResizeMap(resizeHistoryEvent.oldSize);
+		}
+	}
+
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	// UI functions
+
+	void UpdateUI(){
+		this.uiRefs.sizeXTextbox.text = this.map.size.x.ToString();
+		this.uiRefs.sizeYTextbox.text = this.map.size.y.ToString();
+
+		this.uiRefs.undoButton.interactable = (
+			this.lastHistoryEventNode != null
+		);
+		this.uiRefs.redoButton.interactable = (
+			this.historyEvents.Count > 0 &&
+			this.historyEvents.Last != this.lastHistoryEventNode
+		);
+	}
 
 	void InputFieldChanged(InputField inputField){
 		if(inputField == this.uiRefs.sizeXTextbox || inputField == this.uiRefs.sizeYTextbox){
@@ -141,5 +168,21 @@ public class MapEditor :
 
 			AddNewHistoryEvent(historyEvent);
 		}
+	}
+
+	void UndoRedoButtonPressed(Button button){
+		if(button == this.uiRefs.undoButton){
+			this.UndoHistoryEvent(this.lastHistoryEventNode.Value);
+			this.lastHistoryEventNode = this.lastHistoryEventNode.Previous;
+		}else if(button == this.uiRefs.redoButton){
+			if(this.lastHistoryEventNode != null){
+				this.lastHistoryEventNode = this.lastHistoryEventNode.Next;
+			}else{
+				this.lastHistoryEventNode = this.historyEvents.First;
+			}
+			this.DoHistoryEvent(this.lastHistoryEventNode.Value);
+		}
+
+		this.UpdateUI();
 	}
 }
