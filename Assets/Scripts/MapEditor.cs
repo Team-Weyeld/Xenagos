@@ -14,6 +14,11 @@ class ResizeHistoryEvent : BaseHistoryEvent{
 	public List<BattleMap.TileOverride> removedTiles;
 }
 
+enum MapEditorState{
+	Normal,
+	SelectionPaint,
+}
+
 public class MapEditor :
 	MonoBehaviour,
 	MapDisplayEventListener
@@ -23,14 +28,19 @@ public class MapEditor :
 	public BattleMap defaultMap;
 	// [HideInInspector] public Game game;
 
+	MapEditorState state;
 	BattleMap map;
+	List<MapTile> selectedTiles;
+	MapTile lastEnteredTile;
 	LinkedList<BaseHistoryEvent> historyEvents;
 	LinkedListNode<BaseHistoryEvent> lastHistoryEventNode;
 
 	void Start(){
 		// this.game = GameObject.Find("Game").GetComponent<Game>();
 
+		this.state = MapEditorState.Normal;
 		this.map = this.defaultMap;
+		this.selectedTiles = new List<MapTile>();
 		this.historyEvents = new LinkedList<BaseHistoryEvent>();
 		this.lastHistoryEventNode = null;
 
@@ -45,8 +55,9 @@ public class MapEditor :
 		Utility.AddInputFieldChangedListener(this.uiRefs.sizeXTextbox, this.InputFieldChanged);
 		Utility.AddInputFieldChangedListener(this.uiRefs.sizeYTextbox, this.InputFieldChanged);
 
-		Utility.AddButtonClickListener(this.uiRefs.undoButton, this.UndoRedoButtonPressed);
-		Utility.AddButtonClickListener(this.uiRefs.redoButton, this.UndoRedoButtonPressed);
+		Utility.AddButtonClickListener(this.uiRefs.undoButton, this.ButtonPressed);
+		Utility.AddButtonClickListener(this.uiRefs.redoButton, this.ButtonPressed);
+		Utility.AddButtonClickListener(this.uiRefs.selectNoneButton, this.ButtonPressed);
 	}
 
 	void RebuildMapDisplay(){
@@ -89,23 +100,62 @@ public class MapEditor :
 		return removedTiles;
 	}
 
-	public void MouseEvent(MapTile mapTile, MapDisplay.MouseEventType eventType){
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	// State-dependent functions
+
+	void SetState(MapEditorState newState){
+		if(this.state == MapEditorState.Normal){
+			this.mapDisplay.DisableHoveredTile();
+		}
+
+		this.state = newState;
+
+		if(newState == MapEditorState.SelectionPaint){
+			if(
+				this.lastEnteredTile != null &&
+				this.selectedTiles.Contains(this.lastEnteredTile) == false
+			){
+				this.selectedTiles.Add(this.lastEnteredTile);
+				this.mapDisplay.SetSelectedTiles(this.selectedTiles);
+			}
+		}
+
+		this.UpdateUI();
+	}
+
+	public void MouseEvent(MapTile tile, MapDisplay.MouseEventType eventType){
 		if(hardInput.GetKey("Pan Camera")){
 			return;
 		}
 
 		if(eventType == MapDisplay.MouseEventType.Enter){
-			this.mapDisplay.SetHoveredTile(mapTile);
-		}else if(eventType == MapDisplay.MouseEventType.Exit){
-			this.mapDisplay.DisableHoveredTile();
-		}else if(eventType == MapDisplay.MouseEventType.Click){
-			if(mapTile){
-				this.mapDisplay.SetSelectedTile(mapTile);
-			}else{
-				this.mapDisplay.DisableSelectedTile();
+			this.lastEnteredTile = tile;
+
+			if(this.state == MapEditorState.Normal){
+				if(tile){
+					this.mapDisplay.SetHoveredTile(tile);
+				}else{
+					this.mapDisplay.DisableHoveredTile();
+				}
+			}else if(this.state == MapEditorState.SelectionPaint){
+				if(tile && this.selectedTiles.Contains(tile) == false){
+					this.selectedTiles.Add(tile);
+					this.mapDisplay.SetSelectedTiles(this.selectedTiles);
+				}
 			}
-		}else if(eventType == MapDisplay.MouseEventType.RightClick){
-			
+		}else if(eventType == MapDisplay.MouseEventType.Exit){
+			this.lastEnteredTile = null;
+		}else if(eventType == MapDisplay.MouseEventType.Click){
+
+		}else if(eventType == MapDisplay.MouseEventType.ClickDown){
+			if(this.state == MapEditorState.Normal){
+				this.SetState(MapEditorState.SelectionPaint);
+			}
+		}else if(eventType == MapDisplay.MouseEventType.ClickUp){
+			if(this.state == MapEditorState.SelectionPaint){
+				this.SetState(MapEditorState.Normal);
+			}
 		}
 	}
 
@@ -159,6 +209,14 @@ public class MapEditor :
 			this.historyEvents.Count > 0 &&
 			this.historyEvents.Last != this.lastHistoryEventNode
 		);
+
+		this.uiRefs.corePanelMask.SetActive(this.state != MapEditorState.Normal);
+
+
+		this.uiRefs.selectedTilesPanel.SetActive(
+			this.selectedTiles.Count > 0 &&
+			this.state != MapEditorState.Normal
+		);
 	}
 
 	void InputFieldChanged(InputField inputField){
@@ -178,10 +236,12 @@ public class MapEditor :
 		}
 	}
 
-	void UndoRedoButtonPressed(Button button){
+	void ButtonPressed(Button button){
 		if(button == this.uiRefs.undoButton){
 			this.UndoHistoryEvent(this.lastHistoryEventNode.Value);
 			this.lastHistoryEventNode = this.lastHistoryEventNode.Previous;
+
+			this.UpdateUI();
 		}else if(button == this.uiRefs.redoButton){
 			if(this.lastHistoryEventNode != null){
 				this.lastHistoryEventNode = this.lastHistoryEventNode.Next;
@@ -189,8 +249,11 @@ public class MapEditor :
 				this.lastHistoryEventNode = this.historyEvents.First;
 			}
 			this.DoHistoryEvent(this.lastHistoryEventNode.Value);
-		}
 
-		this.UpdateUI();
+			this.UpdateUI();
+		}else if(button == this.uiRefs.selectNoneButton){
+			this.selectedTiles.Clear();
+			this.mapDisplay.SetSelectedTiles(this.selectedTiles);
+		}
 	}
 }

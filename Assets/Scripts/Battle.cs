@@ -693,7 +693,7 @@ public class Battle :
 				if(this.selectedTile){
 					// Unselected this tile.
 
-					this.mapDisplay.DisableSelectedTile();
+					this.mapDisplay.DisableSelectedTiles();
 					this.mapDisplay.DisableTargetTile();
 				}
 				this.selectedTile = clickedTile;

@@ -13,6 +13,8 @@ public class MapDisplay : MonoBehaviour {
 		Exit,
 		Click,
 		RightClick,
+		ClickDown,
+		ClickUp,
 	}
 
 	public GameObject worldGO;
@@ -24,7 +26,8 @@ public class MapDisplay : MonoBehaviour {
 
 	MapTile[] tiles;
 	GameObject hoveredTileGO;
-	GameObject selectedTileGO;
+	GameObject origSelectedTileGO;
+	List<GameObject> selectedTileGOs;
 	GameObject targetTileGO;
 	GameObject backgroundGO;
 
@@ -43,12 +46,14 @@ public class MapDisplay : MonoBehaviour {
 		}
 
 		{
-			this.selectedTileGO = new GameObject("Selected tile");
-			this.selectedTileGO.SetActive(false);
-			this.selectedTileGO.transform.localScale = Vector3.one * 2f;
-			this.selectedTileGO.AddComponent<MeshFilter> ().mesh = Resources.Load<Mesh>("Models/HexTile");
-			MeshRenderer mr = this.selectedTileGO.AddComponent<MeshRenderer>();
+			this.origSelectedTileGO = new GameObject("Selected tile");
+			this.origSelectedTileGO.SetActive(false);
+			this.origSelectedTileGO.transform.localScale = Vector3.one * 2f;
+			this.origSelectedTileGO.AddComponent<MeshFilter> ().mesh = Resources.Load<Mesh>("Models/HexTile");
+			MeshRenderer mr = this.origSelectedTileGO.AddComponent<MeshRenderer>();
 			mr.sharedMaterial = Resources.Load<Material>("Materials/Selected tile");
+
+			this.selectedTileGOs = new List<GameObject>();
 		}
 
 		{
@@ -71,17 +76,40 @@ public class MapDisplay : MonoBehaviour {
 
 			EventTrigger eventTrigger = this.backgroundGO.AddComponent<EventTrigger>();
 
-			var entry = new EventTrigger.Entry();
-			entry.eventID = EventTriggerType.PointerClick;
-			entry.callback.AddListener((data) => {
-				var button = ((PointerEventData)data).button;
-				if(button == PointerEventData.InputButton.Left){
-					this.eventListener.MouseEvent(null, MouseEventType.Click);
-				}else if(button == PointerEventData.InputButton.Right){
-					this.eventListener.MouseEvent(null, MouseEventType.RightClick);
-				}
-			});
-			eventTrigger.triggers.Add(entry);
+			{
+				var entry = new EventTrigger.Entry();
+				entry.eventID = EventTriggerType.PointerClick;
+				entry.callback.AddListener((data) => {
+					var button = ((PointerEventData)data).button;
+					if(button == PointerEventData.InputButton.Left){
+						this.eventListener.MouseEvent(null, MouseEventType.Click);
+					}else if(button == PointerEventData.InputButton.Right){
+						this.eventListener.MouseEvent(null, MouseEventType.RightClick);
+					}
+				});
+				eventTrigger.triggers.Add(entry);
+			}
+
+			{
+				var entry = new EventTrigger.Entry();
+				entry.eventID = EventTriggerType.PointerDown;
+				entry.callback.AddListener((data) => {
+					if(((PointerEventData)data).button == PointerEventData.InputButton.Left){
+						this.eventListener.MouseEvent(null, MouseEventType.ClickDown);
+					}
+				});
+				eventTrigger.triggers.Add(entry);
+			}
+			{
+				var entry = new EventTrigger.Entry();
+				entry.eventID = EventTriggerType.PointerUp;
+				entry.callback.AddListener((data) => {
+					if(((PointerEventData)data).button == PointerEventData.InputButton.Left){
+						this.eventListener.MouseEvent(null, MouseEventType.ClickUp);
+					}
+				});
+				eventTrigger.triggers.Add(entry);
+			}
 		}
 
 		this.tiles = new MapTile[0];
@@ -109,7 +137,7 @@ public class MapDisplay : MonoBehaviour {
 
 	public void Recreate(Vector2i newSize){
 		this.DisableHoveredTile();
-		this.DisableSelectedTile();
+		this.DisableSelectedTiles();
 		this.DisableTargetTile();
 
 		foreach(MapTile tile in this.tiles){
@@ -149,14 +177,31 @@ public class MapDisplay : MonoBehaviour {
 		this.hoveredTileGO.transform.parent = null;
 	}
 
-	// Selected tile
+	// Selected tiles
 	public void SetSelectedTile(MapTile tile){
-		tile.AttachForeground(this.selectedTileGO.transform, 1);
-		this.selectedTileGO.SetActive(true);
+		var tiles = new List<MapTile>();
+		tiles.Add(tile);
+		this.SetSelectedTiles(tiles);
 	}
-	public void DisableSelectedTile(){
-		this.selectedTileGO.SetActive(false);
-		this.selectedTileGO.transform.parent = null;
+	public void SetSelectedTiles(List<MapTile> tiles){
+		this.DisableSelectedTiles();
+
+		if(tiles == null){
+			return;
+		}
+
+		foreach(var tile in tiles){
+			var clone = Instantiate(this.origSelectedTileGO) as GameObject;
+			tile.AttachForeground(clone.transform, 1);
+			clone.SetActive(true);
+			this.selectedTileGOs.Add(clone);
+		}
+	}
+	public void DisableSelectedTiles(){
+		foreach(var go in this.selectedTileGOs){
+			Destroy(go);
+		}
+		this.selectedTileGOs.Clear();
 	}
 
 	// Target tile

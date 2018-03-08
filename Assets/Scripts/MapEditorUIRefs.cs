@@ -6,10 +6,13 @@ using UnityEngine.UI;
 public class MapEditorUIRefs : MonoBehaviour{
 	public Canvas canvas;
 	[Space]
+	public GameObject corePanelMask;
 	public InputField sizeXTextbox;
 	public InputField sizeYTextbox;
-	[Space]
 	public Button undoButton;
 	public Button redoButton;
 	public Button selectNoneButton;
+	[Space]
+	public GameObject selectedTilesPanel;
+	public InputField selectedTilesTextbox;
 }

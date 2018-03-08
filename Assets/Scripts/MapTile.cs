@@ -8,7 +8,9 @@ public class MapTile :
 	MonoBehaviour,
 	IPointerEnterHandler,
 	IPointerExitHandler,
-	IPointerClickHandler
+	IPointerClickHandler,
+	IPointerDownHandler,
+	IPointerUpHandler
 {
 	public static float depthSpacing = 0.01f;
 	public static float hexSpacingX = 1f;
@@ -139,6 +141,18 @@ public class MapTile :
 			this.map.eventListener.MouseEvent(this, MapDisplay.MouseEventType.Click);
 		}else if(eventData.button == PointerEventData.InputButton.Right){
 			this.map.eventListener.MouseEvent(this, MapDisplay.MouseEventType.RightClick);
+		}
+	}
+
+	public void OnPointerDown(PointerEventData eventData){
+		if(eventData.button == PointerEventData.InputButton.Left){
+			this.map.eventListener.MouseEvent(this, MapDisplay.MouseEventType.ClickDown);
+		}
+	}
+
+	public void OnPointerUp(PointerEventData eventData){
+		if(eventData.button == PointerEventData.InputButton.Left){
+			this.map.eventListener.MouseEvent(this, MapDisplay.MouseEventType.ClickUp);
 		}
 	}
 }
