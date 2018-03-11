@@ -1,16 +1,21 @@
-﻿using System.Collections;
+﻿using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 abstract class BaseHistoryEvent{
-	
+	public int index;
 }
 class ResizeHistoryEvent : BaseHistoryEvent{
 	public Vector2i oldSize;
 	public Vector2i newSize;
 	public List<BattleMap.TileOverride> removedTiles;
+}
+class SelectionChangeHistoryEvent : BaseHistoryEvent{
+	public List<Vector2i> oldSelectedTiles;
+	public List<Vector2i> newSelectedTiles;
 }
 
 enum MapEditorState{
@@ -34,6 +39,7 @@ public class MapEditor :
 	MapTile lastEnteredTile;
 	LinkedList<BaseHistoryEvent> historyEvents;
 	LinkedListNode<BaseHistoryEvent> lastHistoryEventNode;
+	BaseHistoryEvent inProgressHistoryEvent;
 
 	void Start(){
 		// this.game = GameObject.Find("Game").GetComponent<Game>();
@@ -107,11 +113,23 @@ public class MapEditor :
 	void SetState(MapEditorState newState){
 		if(this.state == MapEditorState.Normal){
 			this.mapDisplay.DisableHoveredTile();
+		}else if(this.state == MapEditorState.SelectionPaint || this.state == MapEditorState.SelectionErase){
+			var he = (SelectionChangeHistoryEvent)this.inProgressHistoryEvent;
+			he.newSelectedTiles = new List<Vector2i>(this.selectedTiles.Select(x => x.pos));
+			if(he.oldSelectedTiles.SequenceEqual(he.newSelectedTiles) == false){
+				this.AddNewHistoryEvent(he);
+			}
+
+			this.inProgressHistoryEvent = null;
 		}
 
 		this.state = newState;
 
 		if(newState == MapEditorState.SelectionPaint){
+			var he = new SelectionChangeHistoryEvent();
+			he.oldSelectedTiles = new List<Vector2i>(this.selectedTiles.Select(x => x.pos));
+			this.inProgressHistoryEvent = he;
+
 			if(
 				this.lastEnteredTile != null &&
 				this.selectedTiles.Contains(this.lastEnteredTile) == false
@@ -120,6 +138,10 @@ public class MapEditor :
 				this.mapDisplay.SetSelectedTiles(this.selectedTiles);
 			}
 		}else if(newState == MapEditorState.SelectionErase){
+			var he = new SelectionChangeHistoryEvent();
+			he.oldSelectedTiles = new List<Vector2i>(this.selectedTiles.Select(x => x.pos));
+			this.inProgressHistoryEvent = he;
+
 			if(
 				this.lastEnteredTile != null &&
 				this.selectedTiles.Contains(this.lastEnteredTile) == true
@@ -189,6 +211,8 @@ public class MapEditor :
 			this.historyEvents.RemoveLast();
 		}
 
+		baseHistoryEvent.index = this.historyEvents.Count;
+
 		this.lastHistoryEventNode = this.historyEvents.AddLast(baseHistoryEvent);
 
 		this.DoHistoryEvent(baseHistoryEvent);
@@ -198,9 +222,13 @@ public class MapEditor :
 
 	void DoHistoryEvent(BaseHistoryEvent baseHistoryEvent){
 		if(baseHistoryEvent.GetType() == typeof(ResizeHistoryEvent)){
-			var resizeHistoryEvent = (ResizeHistoryEvent)baseHistoryEvent;
-			resizeHistoryEvent.removedTiles = this.ResizeMap(resizeHistoryEvent.newSize);
+			var he = (ResizeHistoryEvent)baseHistoryEvent;
+			he.removedTiles = this.ResizeMap(he.newSize);
 			this.RebuildMapDisplay();
+		}else if(baseHistoryEvent.GetType() == typeof(SelectionChangeHistoryEvent)){
+			var he = (SelectionChangeHistoryEvent)baseHistoryEvent;
+			this.selectedTiles = new List<MapTile>(he.newSelectedTiles.Select(x => this.mapDisplay.GetTile(x)));
+			this.mapDisplay.SetSelectedTiles(this.selectedTiles);
 		}
 	}
 
@@ -212,6 +240,10 @@ public class MapEditor :
 				this.map.tileOverrides.Add(tileOverride);
 			}
 			this.RebuildMapDisplay();
+		}else if(baseHistoryEvent.GetType() == typeof(SelectionChangeHistoryEvent)){
+			var he = (SelectionChangeHistoryEvent)baseHistoryEvent;
+			this.selectedTiles = new List<MapTile>(he.oldSelectedTiles.Select(x => this.mapDisplay.GetTile(x)));
+			this.mapDisplay.SetSelectedTiles(this.selectedTiles);
 		}
 	}
 
@@ -273,8 +305,10 @@ public class MapEditor :
 
 			this.UpdateUI();
 		}else if(button == this.uiRefs.selectNoneButton){
-			this.selectedTiles.Clear();
-			this.mapDisplay.SetSelectedTiles(this.selectedTiles);
+			var historyEvent = new SelectionChangeHistoryEvent();
+			historyEvent.oldSelectedTiles = new List<Vector2i>(this.selectedTiles.Select(x => x.pos));
+			historyEvent.newSelectedTiles = new List<Vector2i>();
+			AddNewHistoryEvent(historyEvent);
 		}
 	}
 }
