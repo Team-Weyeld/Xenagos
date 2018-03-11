@@ -12,6 +12,7 @@ class ResizeHistoryEvent : BaseHistoryEvent{
 	public Vector2i oldSize;
 	public Vector2i newSize;
 	public List<BattleMap.TileOverride> removedTiles;
+	public List<Vector2i> deselectedTiles;
 }
 class SelectionChangeHistoryEvent : BaseHistoryEvent{
 	public List<Vector2i> oldSelectedTiles;
@@ -67,6 +68,8 @@ public class MapEditor :
 	}
 
 	void RebuildMapDisplay(){
+		var selectedTilesSerialized = new List<Vector2i>(this.selectedTiles.Select(x => x.pos));
+
 		this.mapDisplay.Recreate(this.map.size);
 
 		TileData baseTileData = GameData.GetTile(this.map.baseTileName);
@@ -85,25 +88,15 @@ public class MapEditor :
 				mapTile.SetData(tileData);
 			}
 		}
-	}
 
-	List<BattleMap.TileOverride> ResizeMap(Vector2i newSize){
-		var removedTiles = new List<BattleMap.TileOverride>();
-
-		this.map.size = newSize;
-
-		for(int n = this.map.tileOverrides.Count; n --> 0;){
-			bool isOutsideBounds = (
-				this.map.tileOverrides[n].posX >= newSize.x ||
-				this.map.tileOverrides[n].posY >= newSize.y
-			);
-			if(isOutsideBounds){
-				removedTiles.Add(this.map.tileOverrides[n]);
-				this.map.tileOverrides.RemoveAt(n);
+		this.selectedTiles = new List<MapTile>();
+		foreach(Vector2i pos in selectedTilesSerialized){
+			bool isInBounds = pos.x < this.map.size.x && pos.y < this.map.size.y;
+			if(isInBounds){
+				this.selectedTiles.Add(this.mapDisplay.GetTile(pos));
 			}
 		}
-
-		return removedTiles;
+		this.mapDisplay.SetSelectedTiles(this.selectedTiles);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -223,7 +216,33 @@ public class MapEditor :
 	void DoHistoryEvent(BaseHistoryEvent baseHistoryEvent){
 		if(baseHistoryEvent.GetType() == typeof(ResizeHistoryEvent)){
 			var he = (ResizeHistoryEvent)baseHistoryEvent;
-			he.removedTiles = this.ResizeMap(he.newSize);
+			this.map.size = he.newSize;
+
+			he.removedTiles = new List<BattleMap.TileOverride>();
+			for(int n = this.map.tileOverrides.Count; n --> 0;){
+				bool isOutsideBounds = (
+					this.map.tileOverrides[n].posX >= he.newSize.x ||
+					this.map.tileOverrides[n].posY >= he.newSize.y
+				);
+				if(isOutsideBounds){
+					he.removedTiles.Add(this.map.tileOverrides[n]);
+					this.map.tileOverrides.RemoveAt(n);
+				}
+			}
+
+			he.deselectedTiles = new List<Vector2i>();
+			for(int n = this.selectedTiles.Count; n --> 0;){
+				var tile = this.selectedTiles[n];
+				bool isOutsideBounds = (
+					tile.pos.x >= he.newSize.x ||
+					tile.pos.y >= he.newSize.y
+				);
+				if(isOutsideBounds){
+					he.deselectedTiles.Add(tile.pos);
+					this.selectedTiles.RemoveAt(n);
+				}
+			}
+
 			this.RebuildMapDisplay();
 		}else if(baseHistoryEvent.GetType() == typeof(SelectionChangeHistoryEvent)){
 			var he = (SelectionChangeHistoryEvent)baseHistoryEvent;
@@ -234,12 +253,19 @@ public class MapEditor :
 
 	void UndoHistoryEvent(BaseHistoryEvent baseHistoryEvent){
 		if(baseHistoryEvent.GetType() == typeof(ResizeHistoryEvent)){
-			var resizeHistoryEvent = (ResizeHistoryEvent)baseHistoryEvent;
-			this.ResizeMap(resizeHistoryEvent.oldSize);
-			foreach(var tileOverride in resizeHistoryEvent.removedTiles){
+			var he = (ResizeHistoryEvent)baseHistoryEvent;
+			this.map.size = he.oldSize;
+
+			foreach(var tileOverride in he.removedTiles){
 				this.map.tileOverrides.Add(tileOverride);
 			}
+
 			this.RebuildMapDisplay();
+
+			foreach(var pos in he.deselectedTiles){
+				this.selectedTiles.Add(this.mapDisplay.GetTile(pos));
+			}
+			this.mapDisplay.SetSelectedTiles(this.selectedTiles);
 		}else if(baseHistoryEvent.GetType() == typeof(SelectionChangeHistoryEvent)){
 			var he = (SelectionChangeHistoryEvent)baseHistoryEvent;
 			this.selectedTiles = new List<MapTile>(he.oldSelectedTiles.Select(x => this.mapDisplay.GetTile(x)));
