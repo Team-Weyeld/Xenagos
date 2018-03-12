@@ -76,15 +76,16 @@ public class MapEditor :
 		TileData tileData = baseTileData;
 		for (int y = 0; y < this.map.size.y; ++y) {
 			for (int x = 0; x < this.map.size.x; ++x) {
+				var pos = new Vector2i(x, y);
 				tileData = baseTileData;
 				foreach (var o in this.map.tileOverrides) {
-					if(o.posX == x && o.posY == y){
+					if(o.pos == pos){
 						tileData = GameData.GetTile(o.name);
 						break;
 					}
 				}
 
-				MapTile mapTile = this.mapDisplay.GetTile(new Vector2i(x, y));
+				MapTile mapTile = this.mapDisplay.GetTile(pos);
 				mapTile.SetData(tileData);
 			}
 		}
@@ -158,8 +159,6 @@ public class MapEditor :
 			if(this.state == MapEditorState.Normal){
 				if(tile){
 					this.mapDisplay.SetHoveredTile(tile);
-				}else{
-					this.mapDisplay.DisableHoveredTile();
 				}
 			}else if(this.state == MapEditorState.SelectionPaint){
 				if(tile && this.selectedTiles.Contains(tile) == false){
@@ -221,8 +220,8 @@ public class MapEditor :
 			he.removedTiles = new List<BattleMap.TileOverride>();
 			for(int n = this.map.tileOverrides.Count; n --> 0;){
 				bool isOutsideBounds = (
-					this.map.tileOverrides[n].posX >= he.newSize.x ||
-					this.map.tileOverrides[n].posY >= he.newSize.y
+					this.map.tileOverrides[n].pos.x >= he.newSize.x ||
+					this.map.tileOverrides[n].pos.y >= he.newSize.y
 				);
 				if(isOutsideBounds){
 					he.removedTiles.Add(this.map.tileOverrides[n]);

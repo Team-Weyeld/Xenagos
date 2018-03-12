@@ -33,8 +33,7 @@ public struct Scenario{
 public struct BattleMap{
 	[System.Serializable]
 	public struct TileOverride{
-		public int posX;
-		public int posY;
+		public Vector2i pos;
 		public string name;
 	}
 

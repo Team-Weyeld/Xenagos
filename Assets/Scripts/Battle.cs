@@ -99,15 +99,16 @@ public class Battle :
 		this.pathNetwork = new PathNetwork();
 		for (int y = 0; y < map.size.y; ++y) {
 			for (int x = 0; x < map.size.x; ++x) {
+				var pos = new Vector2i(x, y);
 				tileData = baseTileData;
 				foreach (var o in map.tileOverrides) {
-					if(o.posX == x && o.posY == y){
+					if(o.pos == pos){
 						tileData = GameData.GetTile(o.name);
 						break;
 					}
 				}
 
-				MapTile mapTile = this.mapDisplay.GetTile(new Vector2i(x, y));
+				MapTile mapTile = this.mapDisplay.GetTile(pos);
 				BattleTile newTile = mapTile.gameObject.AddComponent<BattleTile>();
 				newTile.Init(this, x, y, tileData);
 				this.tiles[x + y * this.mapSize.x] = newTile;

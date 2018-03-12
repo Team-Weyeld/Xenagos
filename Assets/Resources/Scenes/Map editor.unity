@@ -2059,11 +2059,13 @@ MonoBehaviour:
       y: 8
     baseTileName: Grass
     tileOverrides:
-    - posX: 1
-      posY: 0
+    - pos:
+        x: 1
+        y: 0
       name: Trees
-    - posX: 6
-      posY: 0
+    - pos:
+        x: 6
+        y: 0
       name: Trees
 --- !u!4 &1737862093
 Transform:

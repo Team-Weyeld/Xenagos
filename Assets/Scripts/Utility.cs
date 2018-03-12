@@ -13,6 +13,22 @@ public struct Vector2i{
 		x = a;
 		y = b;
 	}
+
+	public static bool operator ==(Vector2i a, Vector2i b){
+		return a.x == b.x && a.y == b.y;
+	}
+
+	public static bool operator !=(Vector2i a, Vector2i b){
+		return a.x != b.x && a.y != b.y;
+	}
+
+	public override bool Equals(object obj){
+	    return base.Equals(obj);
+	}
+
+	public override int GetHashCode(){
+	    return base.GetHashCode();
+	}
 }
 
 static class Utility{
