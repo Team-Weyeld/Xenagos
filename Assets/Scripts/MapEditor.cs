@@ -173,6 +173,10 @@ public class MapEditor :
 			}
 		}else if(eventType == MapDisplay.MouseEventType.Exit){
 			this.lastEnteredTile = null;
+
+			if(this.state == MapEditorState.Normal){
+				this.mapDisplay.DisableHoveredTile();
+			}
 		}else if(eventType == MapDisplay.MouseEventType.Click){
 
 		}else if(eventType == MapDisplay.MouseEventType.ClickDown){
