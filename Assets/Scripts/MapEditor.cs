@@ -1,6 +1,7 @@
-﻿using System.Linq;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -61,6 +62,7 @@ public class MapEditor :
 
 		Utility.AddInputFieldChangedListener(this.uiRefs.sizeXTextbox, this.InputFieldChanged);
 		Utility.AddInputFieldChangedListener(this.uiRefs.sizeYTextbox, this.InputFieldChanged);
+		Utility.AddInputFieldChangedListener(this.uiRefs.selectedTilesTextbox, this.InputFieldChanged);
 
 		Utility.AddButtonClickListener(this.uiRefs.undoButton, this.ButtonPressed);
 		Utility.AddButtonClickListener(this.uiRefs.redoButton, this.ButtonPressed);
@@ -295,10 +297,45 @@ public class MapEditor :
 		this.uiRefs.corePanelMask.SetActive(this.state != MapEditorState.Normal);
 
 
-		this.uiRefs.selectedTilesPanel.SetActive(
+		if(
 			this.selectedTiles.Count > 0 &&
 			this.state == MapEditorState.Normal
-		);
+		){
+			this.uiRefs.selectedTilesPanel.SetActive(true);
+			this.uiRefs.selectedTilesTextbox.interactable = true;
+
+			bool hasCommonTileName = false;
+			string commonTileName = null;
+			foreach(var selectedTile in this.selectedTiles){
+				string tileName = "";
+				{
+					int index = this.map.tileOverrides.FindIndex(x => x.pos == selectedTile.pos);
+					if(index != -1){
+						tileName = this.map.tileOverrides[index].name;
+					}
+				}
+				if(commonTileName == null){
+					hasCommonTileName = true;
+					commonTileName = tileName;
+				}else if(commonTileName != tileName){
+					hasCommonTileName = false;
+
+					break;
+				}
+			}
+
+			if(hasCommonTileName){
+				this.uiRefs.selectedTilesTextbox.text = commonTileName;
+				if(commonTileName == ""){
+					(this.uiRefs.selectedTilesTextbox.placeholder as Text).text = "[none]";
+				}
+			}else{
+				this.uiRefs.selectedTilesTextbox.text = "";
+				(this.uiRefs.selectedTilesTextbox.placeholder as Text).text = "[various]";
+			}
+		}else{
+			this.uiRefs.selectedTilesPanel.SetActive(false);
+		}
 	}
 
 	void InputFieldChanged(InputField inputField){
@@ -315,6 +352,33 @@ public class MapEditor :
 			}
 
 			AddNewHistoryEvent(historyEvent);
+		}else if(inputField == this.uiRefs.selectedTilesTextbox){
+			Func<Vector2i, int> getTileOverrideIndex = (pos) => {
+				int index = this.map.tileOverrides.FindIndex(x => x.pos == pos);
+				if(index != -1){
+					return index;
+				}else{
+					var newOverride = new BattleMap.TileOverride();
+					newOverride.pos = pos;
+					this.map.tileOverrides.Add(newOverride);
+
+					return this.map.tileOverrides.Count - 1;
+				}
+			};
+
+			foreach(MapTile mapTile in this.selectedTiles){
+				int index = getTileOverrideIndex(mapTile.pos);
+				bool deleteOverride = inputField.text == "";
+				if(deleteOverride){
+					this.map.tileOverrides.RemoveAt(index);
+				}else{
+					var tileOverride = this.map.tileOverrides[index];
+					tileOverride.name = inputField.text;
+					this.map.tileOverrides[index] = tileOverride;
+				}
+			}
+
+			this.RebuildMapDisplay();
 		}
 	}
 
