@@ -37,9 +37,16 @@ public struct BattleMap{
 		public string name;
 	}
 
+	[System.Serializable]
+	public struct Entity{
+		public Vector2i pos;
+		public string name;
+	}
+
 	public Vector2i size;
 	public string baseTileName;
 	public List<TileOverride> tileOverrides;
+	public List<Entity> entities;
 }
 
 public static class BattleMove{
