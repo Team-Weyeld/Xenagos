@@ -94,11 +94,13 @@ public class MapTile :
 		}else if(layer == Layer.MainSprite){
 			go = this.CreateSprite(sprite);
 			this.Attach(go.transform, 5);
+			go.transform.localPosition = new Vector3(0f, 0f, MapTile.hexSpacingY * -0.5f);
 			go.name = "Tile sprite";
 			this.spriteGO = go;
 		}else if(layer == Layer.GhostSprite){
 			go = this.CreateSprite(sprite);
 			this.Attach(go.transform, 6);
+			go.transform.localPosition = new Vector3(0f, 0f, MapTile.hexSpacingY * -0.5f);
 			go.name = "Spooky ghost";
 			this.ghostSpriteGO = go;
 		}
