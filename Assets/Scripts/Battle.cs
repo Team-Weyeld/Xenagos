@@ -17,7 +17,7 @@ public enum BattleState{
 struct MoveActionData{
 	public BattleTile fromTile;
 	public PathingResult? pathingResult;
-	public List<GameObject> ghostMechs;
+	public List<BattleTile> ghostMechTiles;
 	public GameObject losLinesGO;
 	public bool moved;
 }
@@ -145,9 +145,10 @@ public class Battle :
 				BattleTile tile = this.GetTile(m.pos.x, m.pos.y);
 
 				GameObject mechGO = new GameObject(string.Concat("Mech: ", mechData.name));
-				tile.mapTile.Attach(mechGO.transform, 10);
+				mechGO.transform.parent = tile.transform;
 				BattleMech mech = mechGO.AddComponent<BattleMech>();
 				mech.Init(this, mechData);
+				mech.PlaceAtMapTile(tile.mapTile);
 				mech.SetDirection(m.direction);
 				Assert.IsTrue(tile.mech == null);
 				tile.mech = mech;
@@ -347,7 +348,7 @@ public class Battle :
 				prevTile = currentTile;
 			}
 
-			toTile.mapTile.Attach(mech.transform, 10);
+			mech.PlaceAtMapTile(toTile.mapTile);
 
 			BattleTile lastTile1 = (BattleTile)result.nodes[result.nodes.Count - 2];
 			BattleTile lastTile2 = (BattleTile)result.nodes[result.nodes.Count - 1];
@@ -504,12 +505,12 @@ public class Battle :
 
 		if(this.state == BattleState.SelectingAction){
 		}else if(this.state == BattleState.MoveAction){
-			if(this.moveActionData.ghostMechs != null){
-				foreach(GameObject go in this.moveActionData.ghostMechs){
-					Destroy(go);
+			if(this.moveActionData.ghostMechTiles != null){
+				foreach(BattleTile tile in this.moveActionData.ghostMechTiles){
+					tile.mapTile.RemoveLayer(MapTile.Layer.GhostSprite);
 				}
 			}
-			this.moveActionData.ghostMechs = null;
+			this.moveActionData.ghostMechTiles = null;
 
 			if(this.moveActionData.losLinesGO){
 				Destroy(this.moveActionData.losLinesGO);
@@ -536,7 +537,7 @@ public class Battle :
 			this.moveActionData = new MoveActionData();
 			this.moveActionData.fromTile = this.selectedTile;
 			this.moveActionData.pathingResult = null;
-			this.moveActionData.ghostMechs = new List<GameObject>();
+			this.moveActionData.ghostMechTiles = new List<BattleTile>();
 			this.moveActionData.moved = false;
 
 			this.pathNetwork.SetNodeEnabled(this.moveActionData.fromTile, true);
@@ -551,10 +552,10 @@ public class Battle :
 
 	void HexTileHovered(){
 		if(this.state == BattleState.MoveAction){
-			foreach(GameObject go in this.moveActionData.ghostMechs){
-				Destroy(go);
+			foreach(BattleTile tile in this.moveActionData.ghostMechTiles){
+				tile.mapTile.RemoveLayer(MapTile.Layer.GhostSprite);
 			}
-			this.moveActionData.ghostMechs.Clear();
+			this.moveActionData.ghostMechTiles.Clear();
 
 			if(this.moveActionData.losLinesGO){
 				Destroy(this.moveActionData.losLinesGO);
@@ -581,20 +582,24 @@ public class Battle :
 
 			// Create ghost mechs
 
-			this.moveActionData.ghostMechs.Capacity = result.nodes.Count - 1;
+			this.moveActionData.ghostMechTiles.Capacity = result.nodes.Count - 1;
 
 			GameObject prevGO = this.selectedTile.gameObject;
 			GameObject currentGO;
 			for(int n = 1; n < result.nodes.Count; ++n){
 				BattleTile tile = (BattleTile)result.nodes[n];
 
+				this.moveActionData.ghostMechTiles.Add(tile);
+
 				currentGO = tile.gameObject;
 
 				bool right = currentGO.transform.position.x > prevGO.transform.position.x;
-				MechDirection dir = right ? MechDirection.Right : MechDirection.Left;
-				GameObject ghostGO = this.selectedTile.mech.CreateGhost(dir);
-				this.moveActionData.ghostMechs.Add(ghostGO);
-				tile.mapTile.Attach(ghostGO.transform, 20);
+				tile.mapTile.SetLayer(
+					MapTile.Layer.GhostSprite,
+					sprite: this.selectedTile.mech.data.sprite,
+					flipX: right,
+					alpha: 0.5f
+				);
 
 				prevGO = currentGO;
 			}

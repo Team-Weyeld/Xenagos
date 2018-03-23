@@ -88,7 +88,7 @@ public class MapEditor :
 				}
 
 				MapTile mapTile = this.mapDisplay.GetTile(pos);
-				mapTile.SetData(tileData);
+				mapTile.SetLayersFromData(tileData);
 			}
 		}
 

@@ -12,6 +12,15 @@ public class MapTile :
 	IPointerDownHandler,
 	IPointerUpHandler
 {
+	public enum Layer{
+		Ground,
+		Wall,
+		GroundSprite,
+		MainSprite,
+		GhostSprite,
+		// TargetSprite, HoverSprite, etc?
+	}
+
 	public static float depthSpacing = 0.01f;
 	public static float hexSpacingX = 1f;
 	public static float hexRadius = 1f / Mathf.Cos (2f * Mathf.PI / 12f) * hexSpacingX * 0.5f;
@@ -27,6 +36,7 @@ public class MapTile :
 	GameObject groundGO;
 	GameObject wallGO;
 	GameObject spriteGO;
+	GameObject ghostSpriteGO;
 
 	public void Init(MapDisplay newMapDisplay, Vector2i newPos){
 		this.map = newMapDisplay;
@@ -55,7 +65,92 @@ public class MapTile :
 		go.AddComponent<MeshFilter>().mesh = Resources.Load<Mesh>("Models/HexTile");
 		go.AddComponent<MeshCollider>();
 	}
+		
+	public void SetLayer(
+		Layer layer,
+		Material material = null,
+		Sprite sprite = null,
+		bool flipX = false,
+		float alpha = 1.0f
+	){
+		this.RemoveLayer(layer);
 
+		GameObject go = null;
+
+		if(layer == Layer.Ground){
+			go = new GameObject("Ground model");
+			this.Attach(go.transform, 0);
+			go.AddComponent<MeshFilter>().mesh = Resources.Load<Mesh>("Models/HexTile");
+			go.AddComponent<MeshRenderer>().sharedMaterial = material;
+			this.groundGO = go;
+		}else if(layer == Layer.Wall){
+			this.groundGO.transform.localPosition = Vector3.up * hexSideLength * 2f;
+
+			go = new GameObject("Wall model");
+			this.Attach(go.transform, 0);
+			go.AddComponent<MeshFilter>().mesh = Resources.Load<Mesh>("Models/HexTileWall");
+			go.AddComponent<MeshRenderer>().sharedMaterial = material;
+			this.wallGO = go;
+		}else if(layer == Layer.MainSprite){
+			go = this.CreateSprite(sprite);
+			this.Attach(go.transform, 5);
+			go.name = "Tile sprite";
+			this.spriteGO = go;
+		}else if(layer == Layer.GhostSprite){
+			go = this.CreateSprite(sprite);
+			this.Attach(go.transform, 6);
+			go.name = "Spooky ghost";
+			this.ghostSpriteGO = go;
+		}
+
+		if(flipX){
+			go.transform.localScale = new Vector3(-1, 1f, 1f);
+		}
+
+		if(alpha != 1.0f){
+			Color color = go.GetComponent<SpriteRenderer>().color;
+			color.a = alpha;
+			go.GetComponent<SpriteRenderer>().color = color;
+		}
+	}
+
+	public void RemoveLayer(Layer layer){
+		if(layer == Layer.Ground){
+			if(this.groundGO){
+				Destroy(this.groundGO);
+				this.groundGO = null;
+			}
+		}else if(layer == Layer.Wall){
+			if(this.wallGO){
+				Destroy(this.wallGO);
+				this.wallGO = null;
+			}
+		}else if(layer == Layer.MainSprite){
+			if(this.spriteGO){
+				Destroy(this.spriteGO);
+				this.spriteGO = null;
+			}
+		}else if(layer == Layer.GhostSprite){
+			if(this.ghostSpriteGO){
+				Destroy(this.ghostSpriteGO);
+				this.ghostSpriteGO = null;
+			}
+		}
+	}
+
+	public void SetLayerVisible(Layer layer, bool visible){
+		if(layer == Layer.Ground){
+			this.groundGO.SetActive(visible);
+		}else if(layer == Layer.Wall){
+			this.wallGO.SetActive(visible);
+		}else if(layer == Layer.MainSprite){
+			this.spriteGO.SetActive(visible);
+		}else if(layer == Layer.GhostSprite){
+			this.ghostSpriteGO.SetActive(visible);
+		}
+	}
+
+	// TODO: Make these private?
 	public void Attach(Transform otherTransform, int depthLayer){
 		otherTransform.parent = this.transform;
 		float depth = (float)depthLayer * depthSpacing;
@@ -82,37 +177,15 @@ public class MapTile :
 		}
 	}
 
-	public void SetData(TileData data){
-		if(this.groundGO){
-			Destroy(this.groundGO);
-			this.groundGO = null;
-		}
-		if(this.wallGO){
-			Destroy(this.wallGO);
-			this.wallGO = null;
-		}
-		if(this.spriteGO){
-			Destroy(this.spriteGO);
-			this.spriteGO = null;
-		}
-
-		this.groundGO = new GameObject("Ground model");
-		this.Attach(this.groundGO.transform, 0);
-		this.groundGO.AddComponent<MeshFilter>().mesh = Resources.Load<Mesh>("Models/HexTile");
-		this.groundGO.AddComponent<MeshRenderer>().sharedMaterial = data.groundMaterial;
+	public void SetLayersFromData(TileData data){
+		this.SetLayer(Layer.Ground, material: data.groundMaterial);
 
 		if(data.wallMaterial){
-			this.groundGO.transform.localPosition = Vector3.up * hexSideLength * 2f;
-
-			this.wallGO = new GameObject ("Wall model");
-			this.Attach(this.wallGO.transform, 0);
-			this.wallGO.AddComponent<MeshFilter> ().mesh = Resources.Load<Mesh>("Models/HexTileWall");
-			this.wallGO.AddComponent<MeshRenderer> ().sharedMaterial = data.wallMaterial;
+			this.SetLayer(Layer.Wall, material: data.wallMaterial);
 		}
 
 		if(data.sprite){
-			this.spriteGO = this.map.CreateSprite(data.sprite, this.transform);
-			this.spriteGO.name = "Tile sprite";
+			this.SetLayer(Layer.MainSprite, sprite: data.sprite);
 		}
 	}
 
@@ -158,5 +231,19 @@ public class MapTile :
 		}else if(eventData.button == PointerEventData.InputButton.Right){
 			this.map.eventListener.MouseEvent(this, MapDisplay.MouseEventType.RightClickUp);
 		}
+	}
+
+
+	public GameObject CreateSprite(Sprite sprite){
+		float pitch = this.map.gameCamera.transform.rotation.eulerAngles.x;
+
+		GameObject go = new GameObject("Unnamed battle sprite");
+		go.transform.localRotation = Quaternion.Euler(new Vector3(pitch, 0f, 0f));
+		go.transform.localPosition = new Vector3(0f, 0f, MapTile.hexSpacingY * -0.5f);
+		SpriteRenderer spriteRenderer = go.AddComponent<SpriteRenderer>();
+		spriteRenderer.sharedMaterial = Resources.Load<Material>("Materials/Game sprite");
+		spriteRenderer.sprite = sprite;
+
+		return go;
 	}
 }

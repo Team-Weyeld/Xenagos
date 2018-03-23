@@ -214,18 +214,4 @@ public class MapDisplay : MonoBehaviour {
 		this.targetTileGO.SetActive(false);
 		this.targetTileGO.transform.parent = null;
 	}
-
-	public GameObject CreateSprite(Sprite sprite, Transform parent = null){
-		float pitch = this.gameCamera.transform.rotation.eulerAngles.x;
-
-		GameObject go = new GameObject("Unnamed battle sprite");
-		go.transform.parent = parent;
-		go.transform.localRotation = Quaternion.Euler(new Vector3(pitch, 0f, 0f));
-		go.transform.localPosition = new Vector3(0f, 0f, MapTile.hexSpacingY * -0.5f);
-		SpriteRenderer spriteRenderer = go.AddComponent<SpriteRenderer>();
-		spriteRenderer.sharedMaterial = Resources.Load<Material>("Materials/Game sprite");
-		spriteRenderer.sprite = sprite;
-
-		return go;
-	}
 }

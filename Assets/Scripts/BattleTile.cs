@@ -26,7 +26,7 @@ public class BattleTile : MonoBehaviour{
 		this.mapTile = this.battle.mapDisplay.GetTile(this.pos);
 		this.index = newX + newY * this.battle.mapSize.x;
 
-		this.mapTile.SetData(this.data);
+		this.mapTile.SetLayersFromData(this.data);
 
 		this.battle.pathNetwork.AddNode(this, this.transform.position);
 
@@ -104,13 +104,13 @@ public class BattleTile : MonoBehaviour{
 	public void Recreate(TileData newData){
 		this.data = newData;
 
-		this.mapTile.SetData(this.data);
+		this.mapTile.SetLayersFromData(this.data);
 
 		this.ApplyData();
 	}
 
 	void ApplyData(){
-		this.mapTile.SetData(this.data);
+		this.mapTile.SetLayersFromData(this.data);
 
 		if(this.collider2DGO){
 			Destroy(this.collider2DGO);
