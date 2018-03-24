@@ -20,6 +20,11 @@ class SelectionChangeHistoryEvent : BaseHistoryEvent{
 	public List<Vector2i> oldSelectedTiles;
 	public List<Vector2i> newSelectedTiles;
 }
+class TileChangeHistoryEvent : BaseHistoryEvent{
+	// Names can be empty strings
+	public List<BattleMap.TileOverride> oldTiles;
+	public List<BattleMap.TileOverride> newTiles;
+}
 
 enum MapEditorState{
 	Normal,
@@ -294,6 +299,17 @@ public class MapEditor :
 			var he = (SelectionChangeHistoryEvent)baseHistoryEvent;
 			this.selectedTiles = new List<MapTile>(he.newSelectedTiles.Select(x => this.mapDisplay.GetTile(x)));
 			this.mapDisplay.SetSelectedTiles(this.selectedTiles);
+		}else if(baseHistoryEvent.GetType() == typeof(TileChangeHistoryEvent)){
+			var he = (TileChangeHistoryEvent)baseHistoryEvent;
+
+			foreach(var tileOverride in he.newTiles){
+				this.map.tileOverrides.RemoveAll(x => x.pos == tileOverride.pos);
+				if(tileOverride.name != ""){
+					this.map.tileOverrides.Add(tileOverride);
+				}
+			}
+
+			this.RebuildMapDisplay();
 		}
 	}
 
@@ -320,6 +336,17 @@ public class MapEditor :
 			var he = (SelectionChangeHistoryEvent)baseHistoryEvent;
 			this.selectedTiles = new List<MapTile>(he.oldSelectedTiles.Select(x => this.mapDisplay.GetTile(x)));
 			this.mapDisplay.SetSelectedTiles(this.selectedTiles);
+		}else if(baseHistoryEvent.GetType() == typeof(TileChangeHistoryEvent)){
+			var he = (TileChangeHistoryEvent)baseHistoryEvent;
+
+			foreach(var tileOverride in he.oldTiles){
+				this.map.tileOverrides.RemoveAll(x => x.pos == tileOverride.pos);
+				if(tileOverride.name != ""){
+					this.map.tileOverrides.Add(tileOverride);
+				}
+			}
+
+			this.RebuildMapDisplay();
 		}
 	}
 
@@ -434,32 +461,31 @@ public class MapEditor :
 
 			AddNewHistoryEvent(historyEvent);
 		}else if(inputField == this.uiRefs.selectedTilesTextbox){
-			Func<Vector2i, int> getTileOverrideIndex = (pos) => {
-				int index = this.map.tileOverrides.FindIndex(x => x.pos == pos);
-				if(index != -1){
-					return index;
-				}else{
-					var newOverride = new BattleMap.TileOverride();
-					newOverride.pos = pos;
-					this.map.tileOverrides.Add(newOverride);
 
-					return this.map.tileOverrides.Count - 1;
-				}
-			};
+			var he = new TileChangeHistoryEvent();
 
+			he.oldTiles = new List<BattleMap.TileOverride>();
 			foreach(MapTile mapTile in this.selectedTiles){
-				int index = getTileOverrideIndex(mapTile.pos);
-				bool deleteOverride = inputField.text == "";
-				if(deleteOverride){
-					this.map.tileOverrides.RemoveAt(index);
+				int index = this.map.tileOverrides.FindIndex(x => x.pos == mapTile.pos);
+				if(index != -1){
+					he.oldTiles.Add(this.map.tileOverrides[index]);
 				}else{
-					var tileOverride = this.map.tileOverrides[index];
-					tileOverride.name = inputField.text;
-					this.map.tileOverrides[index] = tileOverride;
+					var tileOverride = new BattleMap.TileOverride();
+					tileOverride.pos = mapTile.pos;
+					tileOverride.name = "";
+					he.oldTiles.Add(tileOverride);
 				}
 			}
 
-			this.RebuildMapDisplay();
+			he.newTiles = new List<BattleMap.TileOverride>();
+			foreach(MapTile mapTile in this.selectedTiles){
+				var tileOverride = new BattleMap.TileOverride();
+				tileOverride.pos = mapTile.pos;
+				tileOverride.name = inputField.text;
+				he.newTiles.Add(tileOverride);
+			}
+
+			AddNewHistoryEvent(he);
 		}
 	}
 
