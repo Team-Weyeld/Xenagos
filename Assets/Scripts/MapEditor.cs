@@ -25,6 +25,10 @@ class TileChangeHistoryEvent : BaseHistoryEvent{
 	public List<BattleMap.TileOverride> oldTiles;
 	public List<BattleMap.TileOverride> newTiles;
 }
+class EntityChangeHistoryEvent : BaseHistoryEvent{
+	public List<BattleMap.Entity> oldEntities;
+	public List<BattleMap.Entity> newEntities;
+}
 
 enum MapEditorState{
 	Normal,
@@ -310,6 +314,17 @@ public class MapEditor :
 			}
 
 			this.RebuildMapDisplay();
+		}else if(baseHistoryEvent.GetType() == typeof(EntityChangeHistoryEvent)){
+			var he = (EntityChangeHistoryEvent)baseHistoryEvent;
+
+			foreach(var entity in he.newEntities){
+				this.map.entities.RemoveAll(x => x.pos == entity.pos);
+				if(entity.name != "None"){
+					this.map.entities.Add(entity);
+				}
+			}
+
+			this.RebuildMapDisplay();
 		}
 	}
 
@@ -343,6 +358,17 @@ public class MapEditor :
 				this.map.tileOverrides.RemoveAll(x => x.pos == tileOverride.pos);
 				if(tileOverride.name != ""){
 					this.map.tileOverrides.Add(tileOverride);
+				}
+			}
+
+			this.RebuildMapDisplay();
+		}else if(baseHistoryEvent.GetType() == typeof(EntityChangeHistoryEvent)){
+			var he = (EntityChangeHistoryEvent)baseHistoryEvent;
+
+			foreach(var entity in he.oldEntities){
+				this.map.entities.RemoveAll(x => x.pos == entity.pos);
+				if(entity.name != "None"){
+					this.map.entities.Add(entity);
 				}
 			}
 
@@ -459,9 +485,8 @@ public class MapEditor :
 				historyEvent.newSize.y = newValue;
 			}
 
-			AddNewHistoryEvent(historyEvent);
+			this.AddNewHistoryEvent(historyEvent);
 		}else if(inputField == this.uiRefs.selectedTilesTextbox){
-
 			var he = new TileChangeHistoryEvent();
 
 			he.oldTiles = new List<BattleMap.TileOverride>();
@@ -485,7 +510,7 @@ public class MapEditor :
 				he.newTiles.Add(tileOverride);
 			}
 
-			AddNewHistoryEvent(he);
+			this.AddNewHistoryEvent(he);
 		}
 	}
 
@@ -508,7 +533,7 @@ public class MapEditor :
 			var historyEvent = new SelectionChangeHistoryEvent();
 			historyEvent.oldSelectedTiles = new List<Vector2i>(this.selectedTiles.Select(x => x.pos));
 			historyEvent.newSelectedTiles = new List<Vector2i>();
-			AddNewHistoryEvent(historyEvent);
+			this.AddNewHistoryEvent(historyEvent);
 		}
 	}
 
@@ -520,18 +545,30 @@ public class MapEditor :
 
 			var newEntityType = (MapEditorEntityType)dropdown.value;
 
-			foreach(var tile in this.selectedTiles){
-				this.map.entities.RemoveAll(x => x.pos == tile.pos);
+			var he = new EntityChangeHistoryEvent();
 
-				if(newEntityType != MapEditorEntityType.None){
+			he.oldEntities = new List<BattleMap.Entity>();
+			foreach(var tile in this.selectedTiles){
+				int index = this.map.entities.FindIndex(x => x.pos == tile.pos);
+				if(index != -1){
+					he.oldEntities.Add(this.map.entities[index]);
+				}else{
 					var newEntity = new BattleMap.Entity();
 					newEntity.pos = tile.pos;
-					newEntity.name = newEntityType.ToString();
-					this.map.entities.Add(newEntity);
+					newEntity.name = "None";
+					he.oldEntities.Add(newEntity);
 				}
 			}
 
-			this.RebuildMapDisplay();
+			he.newEntities = new List<BattleMap.Entity>();
+			foreach(var tile in this.selectedTiles){
+				var newEntity = new BattleMap.Entity();
+				newEntity.pos = tile.pos;
+				newEntity.name = newEntityType.ToString();
+				he.newEntities.Add(newEntity);
+			}
+
+			this.AddNewHistoryEvent(he);
 		}
 	}
 }
