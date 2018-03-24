@@ -3146,7 +3146,7 @@ MonoBehaviour:
     - pos:
         x: 2
         y: 2
-      name: MechSpawn
+      name: PlayerMechSpawn
 --- !u!4 &1737862093
 Transform:
   m_ObjectHideFlags: 0

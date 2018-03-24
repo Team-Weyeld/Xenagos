@@ -598,7 +598,7 @@ public class Battle :
 					MapTile.Layer.GhostSprite,
 					sprite: this.selectedTile.mech.data.sprite,
 					flipX: right,
-					alpha: 0.5f
+					color: new Color(1.0f, 1.0f, 1.0f, 0.5f)
 				);
 
 				prevGO = currentGO;

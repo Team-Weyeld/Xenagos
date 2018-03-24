@@ -29,7 +29,8 @@ enum MapEditorState{
 enum MapEditorEntityType{
 	Invalid,
 	None,
-	MechSpawn,
+	PlayerMechSpawn,
+	EnemyMechSpawn,
 }
 
 public class MapEditor :
@@ -109,9 +110,13 @@ public class MapEditor :
 
 		// Entities
 		foreach(var e in this.map.entities){
+			Color color = Color.white;
+			if(e.name == "PlayerMechSpawn") color = Color.HSVToRGB(0.33f, 0.75f, 1.0f);
+			if(e.name == "EnemyMechSpawn") color = Color.HSVToRGB(0.0f, 0.75f, 1.0f);
+
 			MapTile mapTile = this.mapDisplay.GetTile(e.pos);
 			Sprite sprite = Resources.Load<Sprite>("Textures/Entity");
-			mapTile.SetLayer(MapTile.Layer.GhostSprite, sprite: sprite);
+			mapTile.SetLayer(MapTile.Layer.GhostSprite, sprite: sprite, color: color);
 		}
 
 		// Selected tiles

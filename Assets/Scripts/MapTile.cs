@@ -71,7 +71,7 @@ public class MapTile :
 		Material material = null,
 		Sprite sprite = null,
 		bool flipX = false,
-		float alpha = 1.0f
+		Color color = new Color()
 	){
 		this.RemoveLayer(layer);
 
@@ -109,9 +109,7 @@ public class MapTile :
 			go.transform.localScale = new Vector3(-1, 1f, 1f);
 		}
 
-		if(alpha != 1.0f){
-			Color color = go.GetComponent<SpriteRenderer>().color;
-			color.a = alpha;
+		if(color != new Color()){
 			go.GetComponent<SpriteRenderer>().color = color;
 		}
 	}
