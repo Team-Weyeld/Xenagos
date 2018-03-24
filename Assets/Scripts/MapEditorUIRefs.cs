@@ -15,4 +15,5 @@ public class MapEditorUIRefs : MonoBehaviour{
 	[Space]
 	public GameObject selectedTilesPanel;
 	public InputField selectedTilesTextbox;
+	public Dropdown selectedEntityDropdown;
 }

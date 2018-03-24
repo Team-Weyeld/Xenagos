@@ -80,4 +80,11 @@ static class Utility{
 			callback(inputField);
 		});
 	}
+
+	public delegate void DropdownCallbackFunction(Dropdown dropdown);
+	public static void AddDropdownChangedListener(Dropdown dropdown, DropdownCallbackFunction callback){
+		dropdown.onValueChanged.AddListener((int index) => {
+			callback(dropdown);
+		});
+	}
 }

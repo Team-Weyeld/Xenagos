@@ -26,6 +26,12 @@ enum MapEditorState{
 	SelectionErase,
 }
 
+enum MapEditorEntityType{
+	Invalid,
+	None,
+	MechSpawn,
+}
+
 public class MapEditor :
 	MonoBehaviour,
 	MapDisplayEventListener
@@ -58,6 +64,15 @@ public class MapEditor :
 
 		// UI stuff
 
+		this.uiRefs.selectedEntityDropdown.ClearOptions();
+		foreach(MapEditorEntityType e in Enum.GetValues(typeof(MapEditorEntityType))){
+			string text = e.ToString();
+			if(e == MapEditorEntityType.Invalid){
+				text = " ";
+			}
+			this.uiRefs.selectedEntityDropdown.options.Add(new Dropdown.OptionData(text));
+		}
+
 		this.UpdateUI();
 
 		Utility.AddInputFieldChangedListener(this.uiRefs.sizeXTextbox, this.InputFieldChanged);
@@ -67,6 +82,8 @@ public class MapEditor :
 		Utility.AddButtonClickListener(this.uiRefs.undoButton, this.ButtonPressed);
 		Utility.AddButtonClickListener(this.uiRefs.redoButton, this.ButtonPressed);
 		Utility.AddButtonClickListener(this.uiRefs.selectNoneButton, this.ButtonPressed);
+
+		Utility.AddDropdownChangedListener(this.uiRefs.selectedEntityDropdown, this.DropdownChanged);
 	}
 
 	void RebuildMapDisplay(){
@@ -74,24 +91,30 @@ public class MapEditor :
 
 		this.mapDisplay.Recreate(this.map.size);
 
+		// Tiles
 		TileData baseTileData = GameData.GetTile(this.map.baseTileName);
-		TileData tileData = baseTileData;
 		for (int y = 0; y < this.map.size.y; ++y) {
 			for (int x = 0; x < this.map.size.x; ++x) {
 				var pos = new Vector2i(x, y);
-				tileData = baseTileData;
-				foreach (var o in this.map.tileOverrides) {
-					if(o.pos == pos){
-						tileData = GameData.GetTile(o.name);
-						break;
-					}
-				}
 
 				MapTile mapTile = this.mapDisplay.GetTile(pos);
-				mapTile.SetLayersFromData(tileData);
+				mapTile.SetLayersFromData(baseTileData);
 			}
 		}
+		foreach(var o in this.map.tileOverrides){
+			TileData tileData = GameData.GetTile(o.name);
+			MapTile mapTile = this.mapDisplay.GetTile(o.pos);
+			mapTile.SetLayersFromData(tileData);
+		}
 
+		// Entities
+		foreach(var e in this.map.entities){
+			MapTile mapTile = this.mapDisplay.GetTile(e.pos);
+			Sprite sprite = Resources.Load<Sprite>("Textures/Entity");
+			mapTile.SetLayer(MapTile.Layer.GhostSprite, sprite: sprite);
+		}
+
+		// Selected tiles
 		this.selectedTiles = new List<MapTile>();
 		foreach(Vector2i pos in selectedTilesSerialized){
 			bool isInBounds = pos.x < this.map.size.x && pos.y < this.map.size.y;
@@ -302,36 +325,72 @@ public class MapEditor :
 			this.state == MapEditorState.Normal
 		){
 			this.uiRefs.selectedTilesPanel.SetActive(true);
-			this.uiRefs.selectedTilesTextbox.interactable = true;
 
-			bool hasCommonTileName = false;
-			string commonTileName = null;
-			foreach(var selectedTile in this.selectedTiles){
-				string tileName = "";
-				{
-					int index = this.map.tileOverrides.FindIndex(x => x.pos == selectedTile.pos);
-					if(index != -1){
-						tileName = this.map.tileOverrides[index].name;
+			// Tile names textbox
+			{
+				bool hasCommonName = false;
+				string commonName = null;
+				foreach(var selectedTile in this.selectedTiles){
+					string tileName = "";
+					{
+						int index = this.map.tileOverrides.FindIndex(x => x.pos == selectedTile.pos);
+						if(index != -1){
+							tileName = this.map.tileOverrides[index].name;
+						}
+					}
+					if(commonName == null){
+						hasCommonName = true;
+						commonName = tileName;
+					}else if(commonName != tileName){
+						hasCommonName = false;
+
+						break;
 					}
 				}
-				if(commonTileName == null){
-					hasCommonTileName = true;
-					commonTileName = tileName;
-				}else if(commonTileName != tileName){
-					hasCommonTileName = false;
 
-					break;
+				if(hasCommonName){
+					this.uiRefs.selectedTilesTextbox.text = commonName;
+					if(commonName == ""){
+						(this.uiRefs.selectedTilesTextbox.placeholder as Text).text = "[none]";
+					}
+				}else{
+					this.uiRefs.selectedTilesTextbox.text = "";
+					(this.uiRefs.selectedTilesTextbox.placeholder as Text).text = "[various]";
 				}
 			}
 
-			if(hasCommonTileName){
-				this.uiRefs.selectedTilesTextbox.text = commonTileName;
-				if(commonTileName == ""){
-					(this.uiRefs.selectedTilesTextbox.placeholder as Text).text = "[none]";
+			// Entity name dropdown
+			{
+				bool hasCommonName = false;
+				string commonName = null;
+				foreach(var selectedTile in this.selectedTiles){
+					string entityName = "";
+					{
+						int index = this.map.entities.FindIndex(x => x.pos == selectedTile.pos);
+						if(index != -1){
+							entityName = this.map.entities[index].name;
+						}
+					}
+					if(commonName == null){
+						hasCommonName = true;
+						commonName = entityName;
+					}else if(commonName != entityName){
+						hasCommonName = false;
+
+						break;
+					}
 				}
-			}else{
-				this.uiRefs.selectedTilesTextbox.text = "";
-				(this.uiRefs.selectedTilesTextbox.placeholder as Text).text = "[various]";
+
+				this.uiRefs.selectedEntityDropdown.value = (int)MapEditorEntityType.Invalid;
+				if(hasCommonName){
+					MapEditorEntityType commonEntityType = MapEditorEntityType.None;
+					if(commonName != ""){
+						commonEntityType = (MapEditorEntityType)Enum.Parse(typeof(MapEditorEntityType), commonName);
+					}
+					this.uiRefs.selectedEntityDropdown.captionText.text = commonEntityType.ToString();
+				}else{
+					this.uiRefs.selectedEntityDropdown.captionText.text = "[various]";
+				}
 			}
 		}else{
 			this.uiRefs.selectedTilesPanel.SetActive(false);
@@ -402,6 +461,29 @@ public class MapEditor :
 			historyEvent.oldSelectedTiles = new List<Vector2i>(this.selectedTiles.Select(x => x.pos));
 			historyEvent.newSelectedTiles = new List<Vector2i>();
 			AddNewHistoryEvent(historyEvent);
+		}
+	}
+
+	void DropdownChanged(Dropdown dropdown){
+		if(dropdown == this.uiRefs.selectedEntityDropdown){
+			if(dropdown.value == (int)MapEditorEntityType.Invalid){
+				return;
+			}
+
+			var newEntityType = (MapEditorEntityType)dropdown.value;
+
+			foreach(var tile in this.selectedTiles){
+				this.map.entities.RemoveAll(x => x.pos == tile.pos);
+
+				if(newEntityType != MapEditorEntityType.None){
+					var newEntity = new BattleMap.Entity();
+					newEntity.pos = tile.pos;
+					newEntity.name = newEntityType.ToString();
+					this.map.entities.Add(newEntity);
+				}
+			}
+
+			this.RebuildMapDisplay();
 		}
 	}
 }
