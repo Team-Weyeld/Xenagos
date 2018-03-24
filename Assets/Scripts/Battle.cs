@@ -130,8 +130,17 @@ public class Battle :
 
 		// Create teams and place mechs.
 
-		this.teams = new List<BattleTeam>();
+		var playerSpawns = new Stack<Vector2i>();
+		var enemySpawns = new Stack<Vector2i>();
+		foreach(var e in map.entities){
+			if(e.name == "PlayerMechSpawn"){
+				playerSpawns.Push(e.pos);
+			}else if(e.name == "EnemyMechSpawn"){
+				enemySpawns.Push(e.pos);
+			}
+		}
 
+		this.teams = new List<BattleTeam>();
 		foreach(Scenario.Team teamData in scenario.teams){
 			BattleTeam team = new BattleTeam();
 			this.teams.Add(team);
@@ -142,7 +151,8 @@ public class Battle :
 			foreach(Scenario.Mech m in teamData.mechs){
 				MechData mechData = GameData.GetMech(m.mechName);
 
-				BattleTile tile = this.GetTile(m.pos.x, m.pos.y);
+				Vector2i spawnPos = team.isPlayer ? playerSpawns.Pop() : enemySpawns.Pop();
+				BattleTile tile = this.GetTile(spawnPos);
 
 				GameObject mechGO = new GameObject(string.Concat("Mech: ", mechData.name));
 				mechGO.transform.parent = tile.transform;

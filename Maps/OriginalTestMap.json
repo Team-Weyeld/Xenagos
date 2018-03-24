@@ -4,6 +4,21 @@
 		"y": 8
 	},
 	"baseTileName": "Grass",
+	"entities": [
+		{
+			"pos": {
+				"x": 2,
+				"y": 2
+			},
+			"name": "PlayerMechSpawn"
+		},{
+			"pos": {
+				"x": 6,
+				"y": 6
+			},
+			"name": "EnemyMechSpawn"
+		}
+	],
 	"tileOverrides": [
 		{
 			"pos": {

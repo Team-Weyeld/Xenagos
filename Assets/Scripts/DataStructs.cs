@@ -13,7 +13,7 @@ public struct Scenario{
 	[System.Serializable]
 	public struct Mech{
 		public string mechName;
-		public Vector2i pos;
+		// ?
 		public MechDirection direction;
 	}
 
