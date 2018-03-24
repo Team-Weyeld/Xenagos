@@ -13,6 +13,7 @@ class ResizeHistoryEvent : BaseHistoryEvent{
 	public Vector2i oldSize;
 	public Vector2i newSize;
 	public List<BattleMap.TileOverride> removedTiles;
+	public List<BattleMap.Entity> removedEntities;
 	public List<Vector2i> deselectedTiles;
 }
 class SelectionChangeHistoryEvent : BaseHistoryEvent{
@@ -263,6 +264,18 @@ public class MapEditor :
 				}
 			}
 
+			he.removedEntities = new List<BattleMap.Entity>();
+			for(int n = this.map.entities.Count; n --> 0;){
+				bool isOutsideBounds = (
+					this.map.entities[n].pos.x >= he.newSize.x ||
+					this.map.entities[n].pos.y >= he.newSize.y
+				);
+				if(isOutsideBounds){
+					he.removedEntities.Add(this.map.entities[n]);
+					this.map.entities.RemoveAt(n);
+				}
+			}
+
 			he.deselectedTiles = new List<Vector2i>();
 			for(int n = this.selectedTiles.Count; n --> 0;){
 				var tile = this.selectedTiles[n];
@@ -291,6 +304,10 @@ public class MapEditor :
 
 			foreach(var tileOverride in he.removedTiles){
 				this.map.tileOverrides.Add(tileOverride);
+			}
+
+			foreach(var entity in he.removedEntities){
+				this.map.entities.Add(entity);
 			}
 
 			this.RebuildMapDisplay();
