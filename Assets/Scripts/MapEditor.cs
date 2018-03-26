@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -86,10 +87,13 @@ public class MapEditor :
 
 		this.UpdateUI();
 
+		Utility.AddInputFieldChangedListener(this.uiRefs.mapNameTextbox, this.InputFieldChanged);
 		Utility.AddInputFieldChangedListener(this.uiRefs.sizeXTextbox, this.InputFieldChanged);
 		Utility.AddInputFieldChangedListener(this.uiRefs.sizeYTextbox, this.InputFieldChanged);
 		Utility.AddInputFieldChangedListener(this.uiRefs.selectedTilesTextbox, this.InputFieldChanged);
 
+		Utility.AddButtonClickListener(this.uiRefs.saveButton, this.ButtonPressed);
+		Utility.AddButtonClickListener(this.uiRefs.loadButton, this.ButtonPressed);
 		Utility.AddButtonClickListener(this.uiRefs.undoButton, this.ButtonPressed);
 		Utility.AddButtonClickListener(this.uiRefs.redoButton, this.ButtonPressed);
 		Utility.AddButtonClickListener(this.uiRefs.selectNoneButton, this.ButtonPressed);
@@ -534,6 +538,24 @@ public class MapEditor :
 			historyEvent.oldSelectedTiles = new List<Vector2i>(this.selectedTiles.Select(x => x.pos));
 			historyEvent.newSelectedTiles = new List<Vector2i>();
 			this.AddNewHistoryEvent(historyEvent);
+		}else if(button == this.uiRefs.saveButton){
+			string jsonText = JsonUtility.ToJson(this.map, true);
+			var sw = new StreamWriter("Maps/" + this.uiRefs.mapNameTextbox.text + ".json");
+			sw.Write(jsonText);
+			sw.Close();
+		}else if(button == this.uiRefs.loadButton){
+			StreamReader sr = new StreamReader("Maps/" + this.uiRefs.mapNameTextbox.text + ".json");
+			string jsonText = sr.ReadToEnd();
+			sr.Close();
+
+			this.map = JsonUtility.FromJson<BattleMap>(jsonText);
+
+			this.selectedTiles = new List<MapTile>();
+			this.historyEvents = new LinkedList<BaseHistoryEvent>();
+			this.lastHistoryEventNode = null;
+
+			this.RebuildMapDisplay();
+			this.UpdateUI();
 		}
 	}
 

@@ -7,6 +7,9 @@ public class MapEditorUIRefs : MonoBehaviour{
 	public Canvas canvas;
 	[Space]
 	public GameObject corePanelMask;
+	public InputField mapNameTextbox;
+	public Button saveButton;
+	public Button loadButton;
 	public InputField sizeXTextbox;
 	public InputField sizeYTextbox;
 	public Button undoButton;
