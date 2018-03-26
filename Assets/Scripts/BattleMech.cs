@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// TODO: not needed as a MonoBehaviour anymore?
 public class BattleMech : MonoBehaviour{
 	// Uuuugh this is so ugly
 	public struct APCostResult{
@@ -11,7 +12,8 @@ public class BattleMech : MonoBehaviour{
 
 	public Battle battle;
 	public MechData data;
-	public HexTile tile;
+	public BattleTile tile;
+	public MapTile mapTile;
 	public float hp;
 	public float maxActionPoints;
 	public float actionPoints;
@@ -28,16 +30,10 @@ public class BattleMech : MonoBehaviour{
 		this.data = mechData;
 
 		this.hp = this.data.maxHP;
-
 		this.maxActionPoints = 5f; // temporary constant
 		this.actionPoints = this.maxActionPoints;
 		this.fireAuto = true;
 		this.isDestroyed = false;
-
-		this.spriteGO = this.battle.CreateSprite(this.data.sprite, this.transform);
-		this.spriteGO.name = "Mech sprite";
-		// Gotta figure out how to do this properly, maybe shift the sprites pixels up in the image?
-//		this.spriteGO.transform.localPosition = new Vector3(0f, 0f, -0.2f);
 	}
 
 	// Hmmm, maybe change this to a function that calculates moving only one tile? yeah that makes a lot more sense...
@@ -54,11 +50,11 @@ public class BattleMech : MonoBehaviour{
 				apUsedToSecondLast = apUsedTotal;
 			}
 
-			float mult1 = ((HexTile)tiles[n - 1]).data.movementSpeedMult;
-			float mult2 = ((HexTile)tiles[n]).data.movementSpeedMult;
+			float mult1 = ((BattleTile)tiles[n - 1]).data.movementSpeedMult;
+			float mult2 = ((BattleTile)tiles[n]).data.movementSpeedMult;
 			float speedMult = (mult1 + mult2) * 0.5f;
 
-			bool isFiring = this.fireAuto && this.target && this.battle.TestLOS((HexTile)tiles[n], this.target.tile);
+			bool isFiring = this.fireAuto && this.target && this.battle.TestLOS(this.tile, this.target.tile);
 
 			float movementCost = this.data.movementCost;
 			if(isFiring){
@@ -83,26 +79,28 @@ public class BattleMech : MonoBehaviour{
 		return result;
 	}
 
-	public void SetDirection(MechDirection dir){
-		float scaleX = dir == MechDirection.Right ? -1f : 1f;
-		this.transform.localScale = new Vector3(scaleX, 1f, 1f);
-	}
-
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	// Visual only
-	public void SetRevealed(bool revealed){
-		this.spriteGO.SetActive(revealed);
+
+	public void PlaceAtMapTile(MapTile newMapTile){
+		if(this.mapTile){
+			this.mapTile.RemoveLayer(MapTile.Layer.MainSprite);
+		}
+
+		this.mapTile = newMapTile;
+
+		this.mapTile.SetLayer(MapTile.Layer.MainSprite, sprite: this.data.sprite);
 	}
 
-	public GameObject CreateGhost(MechDirection direction){
-		GameObject go = this.battle.CreateSprite(this.data.sprite);
-		go.name = "Spooky ghost mech";
+	public void SetDirection(MechDirection dir){
+		this.mapTile.SetLayer(
+			MapTile.Layer.MainSprite,
+			sprite: this.data.sprite,
+			flipX: dir == MechDirection.Right
+		);
+	}
 
-		float scaleX = direction == MechDirection.Right ? -1f : 1f;
-		go.transform.localScale = new Vector3(scaleX, 1f, 1f);
-
-		float alpha = 0.5f;
-		go.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, alpha);
-
-		return go;
+	public void SetRevealed(bool revealed){
+		this.mapTile.SetLayerVisible(MapTile.Layer.MainSprite, revealed);
 	}
 }

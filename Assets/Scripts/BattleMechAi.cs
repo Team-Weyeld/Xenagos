@@ -27,8 +27,8 @@ public class BattleMechAi{
 			return;
 		}
 
-		HexTile ourTile = this.ourMech.tile;
-		HexTile targetTile = target.tile;
+		BattleTile ourTile = this.ourMech.tile;
+		BattleTile targetTile = target.tile;
 
 		bool canSeeTarget = this.battle.TestLOS(ourTile, targetTile);
 
@@ -43,7 +43,7 @@ public class BattleMechAi{
 			return;
 		}
 
-		HexTile nextTile = (HexTile)result.nodes[1];
+		BattleTile nextTile = (BattleTile)result.nodes[1];
 
 		if(canSeeTarget && result.distance <= 5){
 			var move = new BattleMove.StandingFire();

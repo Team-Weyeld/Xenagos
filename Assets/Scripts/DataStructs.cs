@@ -13,7 +13,7 @@ public struct Scenario{
 	[System.Serializable]
 	public struct Mech{
 		public string mechName;
-		public Vector2i pos;
+		// ?
 		public MechDirection direction;
 	}
 
@@ -33,14 +33,20 @@ public struct Scenario{
 public struct BattleMap{
 	[System.Serializable]
 	public struct TileOverride{
-		public int posX;
-		public int posY;
+		public Vector2i pos;
+		public string name;
+	}
+
+	[System.Serializable]
+	public struct Entity{
+		public Vector2i pos;
 		public string name;
 	}
 
 	public Vector2i size;
 	public string baseTileName;
-	public TileOverride[] tileOverrides;
+	public List<TileOverride> tileOverrides;
+	public List<Entity> entities;
 }
 
 public static class BattleMove{

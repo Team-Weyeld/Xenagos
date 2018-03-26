@@ -13,6 +13,22 @@ public struct Vector2i{
 		x = a;
 		y = b;
 	}
+
+	public static bool operator ==(Vector2i a, Vector2i b){
+		return a.x == b.x && a.y == b.y;
+	}
+
+	public static bool operator !=(Vector2i a, Vector2i b){
+		return a.x != b.x && a.y != b.y;
+	}
+
+	public override bool Equals(object obj){
+	    return base.Equals(obj);
+	}
+
+	public override int GetHashCode(){
+	    return base.GetHashCode();
+	}
 }
 
 static class Utility{
@@ -56,5 +72,19 @@ static class Utility{
 			}
 		});
 		eventTrigger.triggers.Add(entry);
+	}
+
+	public delegate void InputFieldCallbackFunction(InputField inputField);
+	public static void AddInputFieldChangedListener(InputField inputField, InputFieldCallbackFunction callback){
+		inputField.onEndEdit.AddListener((ifield) => {
+			callback(inputField);
+		});
+	}
+
+	public delegate void DropdownCallbackFunction(Dropdown dropdown);
+	public static void AddDropdownChangedListener(Dropdown dropdown, DropdownCallbackFunction callback){
+		dropdown.onValueChanged.AddListener((int index) => {
+			callback(dropdown);
+		});
 	}
 }

@@ -13,10 +13,6 @@
 			"mechs": [
 				{
 					"mechName": "Caliburn",
-					"pos": {
-						"x": 2,
-						"y": 2
-					},
 					"direction": 1
 				}
 			]
@@ -32,10 +28,6 @@
 			"mechs": [
 				{
 					"mechName": "Solais",
-					"pos": {
-						"x": 6,
-						"y": 6
-					},
 					"direction": 0
 				}
 			]

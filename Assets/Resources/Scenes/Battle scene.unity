@@ -202,6 +202,53 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 18253283}
+--- !u!1 &28172510
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 28172511}
+  - component: {fileID: 28172512}
+  m_Layer: 0
+  m_Name: Battle map
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &28172511
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 28172510}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 409928640}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &28172512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 28172510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9aaadf579560232409d27bf5f3b5b37e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  worldGO: {fileID: 409928639}
+  gameCamera: {fileID: 239210200}
+  cameraPivot: {fileID: 715970121}
+  size:
+    x: 0
+    y: 0
+  cameraDir: {x: 0, y: 0, z: 0}
 --- !u!1 &69954469
 GameObject:
   m_ObjectHideFlags: 0
@@ -1612,6 +1659,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 715970121}
+  - {fileID: 28172511}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3958,7 +4006,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 347.5}
+  m_AnchoredPosition: {x: 0, y: 426.5}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &873554726
@@ -7994,14 +8042,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 333d13b7af612d34bbdc151845dd41ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hexSpacingX: 1
   uiRefs: {fileID: 1721908774}
+  mapDisplay: {fileID: 28172512}
   worldGO: {fileID: 409928639}
   world2DGO: {fileID: 199606171}
-  gameCamera: {fileID: 239210200}
-  cameraPivot: {fileID: 715970121}
-  visualFogOfWar: 0
-  fogOfWar: 0
+  visualFogOfWar: 1
+  fogOfWar: 1
   game: {fileID: 0}
   mapGO: {fileID: 0}
   hexSpacingY: 0

@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class Game : MonoBehaviour{
 	public string scenarioToLoad = "OriginalTestScenario.json";
+	public bool loadMapEditorInstead = false;
 
 	static Game instance;
 
@@ -32,36 +33,40 @@ public class Game : MonoBehaviour{
 	void Start(){
 		Object.DontDestroyOnLoad(this.gameObject);
 
-		Scenario scenario;
-		{
-			string dir = "Scenarios/";
-			string jsonText = "";
+		if(this.loadMapEditorInstead){
+			SceneManager.LoadScene("Map editor");
+		}else{
+			Scenario scenario;
+			{
+				string dir = "Scenarios/";
+				string jsonText = "";
 
-			using(StreamReader sr = new StreamReader(dir + this.scenarioToLoad)){
-				jsonText = sr.ReadToEnd();
+				using(StreamReader sr = new StreamReader(dir + this.scenarioToLoad)){
+					jsonText = sr.ReadToEnd();
+				}
+
+				scenario = JsonUtility.FromJson<Scenario>(jsonText);
 			}
 
-			scenario = JsonUtility.FromJson<Scenario>(jsonText);
-		}
+			BattleMap map;
+			{
+				string dir = "Maps/";
+				string jsonText = "";
 
-		BattleMap map;
-		{
-			string dir = "Maps/";
-			string jsonText = "";
+				using(StreamReader sr = new StreamReader(dir + scenario.map)){
+					jsonText = sr.ReadToEnd();
+				}
 
-			using(StreamReader sr = new StreamReader(dir + scenario.map)){
-				jsonText = sr.ReadToEnd();
+				map = JsonUtility.FromJson<BattleMap>(jsonText);
 			}
 
-			map = JsonUtility.FromJson<BattleMap>(jsonText);
+			BattleHistory battleHistory = new BattleHistory();
+			battleHistory.scenario = scenario;
+			battleHistory.startingMap = map;
+			battleHistory.currentTeamIndex = scenario.startingTeamIndex;
+			battleHistory.moves = new List<object>();
+			Game.StartBattle(battleHistory);
 		}
-
-		BattleHistory battleHistory = new BattleHistory();
-		battleHistory.scenario = scenario;
-		battleHistory.startingMap = map;
-		battleHistory.currentTeamIndex = scenario.startingTeamIndex;
-		battleHistory.moves = new List<object>();
-		Game.StartBattle(battleHistory);
 	}
 
 	void Update(){
@@ -92,7 +97,6 @@ public class Game : MonoBehaviour{
 
 		GameObject go = GameObject.Find("Battle");
 		Battle battle = go.GetComponent<Battle>();
-
 		battle.Init(this, battleHistory);
 	}
 }

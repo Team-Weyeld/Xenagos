@@ -7,8 +7,13 @@
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+		Tags {
+			"RenderType" = "Transparent"
+			"Queue" = "Transparent"
+			"PreviewType" = "Plane"
+		}
 		LOD 100
+		ZWrite Off
 		Blend SrcAlpha OneMinusSrcAlpha
 
 		Pass

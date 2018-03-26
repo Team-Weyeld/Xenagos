@@ -17,9 +17,9 @@ public enum BattleState{
 
 [System.Serializable]
 struct MoveActionData{
-	public HexTile fromTile;
+	public BattleTile fromTile;
 	public PathingResult? pathingResult;
-	public List<GameObject> ghostMechs;
+	public List<BattleTile> ghostMechTiles;
 	public GameObject losLinesGO;
 	public bool moved;
 }
@@ -33,33 +33,26 @@ public class BattleTeam{
 	public bool[] visibleTiles;
 }
 
-public class Battle : MonoBehaviour{
-	public float hexSpacingX = 1f;
+public class Battle :
+	MonoBehaviour,
+	MapDisplayEventListener
+{
 	public BattleUIRefs uiRefs;
+	public MapDisplay mapDisplay;
 	public GameObject worldGO;
 	public GameObject world2DGO;
-	public Camera gameCamera;
-	public Transform cameraPivot;
 	public bool visualFogOfWar = true;
 	public bool fogOfWar = true;
 	[HideInInspector] public Game game;
-	[HideInInspector] public GameObject mapGO;
-	[HideInInspector] public float hexSpacingY;
-	[HideInInspector] public float hexRadius;
-	[HideInInspector] public float hexSideLength;
 	[HideInInspector] public Vector2i mapSize;
 	[HideInInspector] public PathNetwork pathNetwork;
 	[HideInInspector] public List<BattleTeam> teams;
 
 	BattleHistory history;
 	BattleState state = BattleState.None;
-	HexTile hoveredTile;
-	HexTile selectedTile;
-	GameObject hoveredTileGO;
-	GameObject selectedTileGO;
-	GameObject targetTileGO;
-	GameObject backgroundGO;
-	HexTile[] tiles;
+	BattleTile hoveredTile;
+	BattleTile selectedTile;
+	BattleTile[] tiles;
 	int currentTeamIndex;
 	BattleTeam currentTeam;
 	// TODO: This is dumb, though it will eventually be a meter instead of text. Make an ActionPointMeter Monobehaviour?
@@ -71,13 +64,6 @@ public class Battle : MonoBehaviour{
 	public void Init(Game game, BattleHistory battleHistory){
 		this.game = game;
 
-		this.hexRadius = 1f / Mathf.Cos (2f * Mathf.PI / 12f) * this.hexSpacingX * 0.5f;
-		this.hexSideLength = Mathf.Sin (2f * Mathf.PI / 12f) * this.hexRadius * 2f;
-		this.hexSpacingY = this.hexRadius + this.hexSideLength * 0.5f;
-
-		this.mapGO = new GameObject ("Battle map");
-		this.mapGO.transform.parent = this.worldGO.transform;
-
 		// Copy the history, except for the moves; they'll be applied later.
 		this.history = battleHistory;
 		List<object> moveHistory = battleHistory.moves;
@@ -86,57 +72,9 @@ public class Battle : MonoBehaviour{
 		Scenario scenario = this.history.scenario;
 		BattleMap map = this.history.startingMap;
 
+		this.mapDisplay.Init(this, map.size);
+
 		// Build misc objects.
-
-		{
-			this.hoveredTileGO = new GameObject("Hovered tile");
-			this.hoveredTileGO.SetActive(false);
-			this.hoveredTileGO.AddComponent<MeshFilter> ().mesh = Resources.Load<Mesh>("Models/HexTile");
-			MeshRenderer mr = this.hoveredTileGO.AddComponent<MeshRenderer>();
-			mr.sharedMaterial = Resources.Load<Material>("Materials/Hovered tile");
-		}
-
-		{
-			this.selectedTileGO = new GameObject("Selected tile");
-			this.selectedTileGO.SetActive(false);
-			this.selectedTileGO.transform.localScale = Vector3.one * 2f;
-			this.selectedTileGO.AddComponent<MeshFilter> ().mesh = Resources.Load<Mesh>("Models/HexTile");
-			MeshRenderer mr = this.selectedTileGO.AddComponent<MeshRenderer>();
-			mr.sharedMaterial = Resources.Load<Material>("Materials/Selected tile");
-		}
-
-		{
-			this.targetTileGO = new GameObject("Target tile");
-			this.targetTileGO.SetActive(false);
-			this.targetTileGO.AddComponent<MeshFilter> ().mesh = Resources.Load<Mesh>("Models/HexTile");
-			MeshRenderer mr = this.targetTileGO.AddComponent<MeshRenderer>();
-			mr.sharedMaterial = Resources.Load<Material>("Materials/Target tile");
-		}
-
-		{
-			this.backgroundGO = (GameObject)Instantiate(Resources.Load("Prefabs/Square collider"));
-			this.backgroundGO.name = "Background plane";
-			this.backgroundGO.transform.parent = this.worldGO.transform;
-			float scale = 5f * Mathf.Max(map.size.x, map.size.y);
-			this.backgroundGO.transform.localScale = Vector3.one * scale;
-			Vector3 pos = new Vector3(map.size.x, -1f, map.size.y);
-			pos *= 0.5f;
-			this.backgroundGO.transform.localPosition = pos;
-
-			EventTrigger eventTrigger = this.backgroundGO.AddComponent<EventTrigger>();
-
-			var entry = new EventTrigger.Entry();
-			entry.eventID = EventTriggerType.PointerClick;
-			entry.callback.AddListener((data) => {
-				var button = ((PointerEventData)data).button;
-				if(button == PointerEventData.InputButton.Left){
-					this.MouseEvent(null, MouseEventType.Click);
-				}else if(button == PointerEventData.InputButton.Right){
-					this.MouseEvent(null, MouseEventType.RightClick);
-				}
-			});
-			eventTrigger.triggers.Add(entry);
-		}
 
 		{
 			// Let us know when anything on the UI is clicked (and not handled by a button or something).
@@ -148,9 +86,9 @@ public class Battle : MonoBehaviour{
 			entry.callback.AddListener((data) => {
 				var button = ((PointerEventData)data).button;
 				if(button == PointerEventData.InputButton.Left){
-					this.MouseEvent(null, MouseEventType.Click);
+					this.MouseEvent(null, MapDisplay.MouseEventType.Click);
 				}else if(button == PointerEventData.InputButton.Right){
-					this.MouseEvent(null, MouseEventType.RightClick);
+					this.MouseEvent(null, MapDisplay.MouseEventType.RightClick);
 				}
 			});
 			eventTrigger.triggers.Add(entry);
@@ -159,32 +97,31 @@ public class Battle : MonoBehaviour{
 		// Build map.
 
 		this.mapSize = map.size;
-		this.tiles = new HexTile[this.mapSize.x * this.mapSize.y];
+		this.tiles = new BattleTile[this.mapSize.x * this.mapSize.y];
 		TileData baseTileData = GameData.GetTile(map.baseTileName);
 		TileData tileData = baseTileData;
 		this.pathNetwork = new PathNetwork();
 		for (int y = 0; y < map.size.y; ++y) {
 			for (int x = 0; x < map.size.x; ++x) {
-				GameObject go = new GameObject ("Hex tile");
-				go.transform.parent = this.mapGO.transform;
-
+				var pos = new Vector2i(x, y);
 				tileData = baseTileData;
 				foreach (var o in map.tileOverrides) {
-					if(o.posX == x && o.posY == y){
+					if(o.pos == pos){
 						tileData = GameData.GetTile(o.name);
 						break;
 					}
 				}
 
-				HexTile newTile = go.AddComponent<HexTile>();
+				MapTile mapTile = this.mapDisplay.GetTile(pos);
+				BattleTile newTile = mapTile.gameObject.AddComponent<BattleTile>();
 				newTile.Init(this, x, y, tileData);
 				this.tiles[x + y * this.mapSize.x] = newTile;
 			}
 		}
 
-		foreach(HexTile tile in this.tiles){
+		foreach(BattleTile tile in this.tiles){
 			for(int n = 0; n < 6; ++n){
-				HexTile neighbor = tile.GetNeighbor(n);
+				BattleTile neighbor = tile.GetNeighbor(n);
 				if(neighbor){
 					this.pathNetwork.ConnectNodes(tile, neighbor);
 				}
@@ -197,8 +134,17 @@ public class Battle : MonoBehaviour{
 
 		// Create teams and place mechs.
 
-		this.teams = new List<BattleTeam>();
+		var playerSpawns = new Stack<Vector2i>();
+		var enemySpawns = new Stack<Vector2i>();
+		foreach(var e in map.entities){
+			if(e.name == "PlayerMechSpawn"){
+				playerSpawns.Push(e.pos);
+			}else if(e.name == "EnemyMechSpawn"){
+				enemySpawns.Push(e.pos);
+			}
+		}
 
+		this.teams = new List<BattleTeam>();
 		foreach(Scenario.Team teamData in scenario.teams){
 			BattleTeam team = new BattleTeam();
 			this.teams.Add(team);
@@ -212,12 +158,14 @@ public class Battle : MonoBehaviour{
 			foreach(Scenario.Mech m in teamData.mechs){
 				MechData mechData = GameData.GetMech(m.mechName);
 
-				HexTile tile = this.GetTile(m.pos.x, m.pos.y);
+				Vector2i spawnPos = team.isPlayer ? playerSpawns.Pop() : enemySpawns.Pop();
+				BattleTile tile = this.GetTile(spawnPos);
 
 				GameObject mechGO = new GameObject(string.Concat("Mech: ", mechData.name));
-				tile.Attach(mechGO.transform, 10);
+				mechGO.transform.parent = tile.transform;
 				BattleMech mech = mechGO.AddComponent<BattleMech>();
 				mech.Init(this, mechData);
+				mech.PlaceAtMapTile(tile.mapTile);
 				mech.SetDirection(m.direction);
 				Assert.IsTrue(tile.mech == null);
 				tile.mech = mech;
@@ -285,20 +233,6 @@ public class Battle : MonoBehaviour{
 	}
 
 	void Update(){
-		if(hardInput.GetKey("Pan Camera")){
-			float cameraSizeY = this.gameCamera.orthographicSize;
-			float mouseRatioX = Input.GetAxis("Mouse X") / (float)Screen.height;
-			float mouseRatioY = Input.GetAxis("Mouse Y") / (float)Screen.height;
-			// I don't know why 4 and 8 work but they do ¯\_(ツ)_/¯ (except the speed is doubled in WebGL builds for
-			// some reason... wait, does it think the screen height is the browser window height???)
-			Vector3 newPos = this.cameraPivot.transform.position + new Vector3(
-				mouseRatioX * cameraSizeY * -4f,
-				0f,
-				mouseRatioY * cameraSizeY * -8f
-			);
-			this.cameraPivot.transform.position = newPos;
-		}
-
 		if(hardInput.GetKeyDown("Test LOS")){
 			// Draw a LOS test line from the selected tile to all other tiles.
 
@@ -308,7 +242,7 @@ public class Battle : MonoBehaviour{
 				return;
 			}
 
-			foreach(HexTile tile in this.tiles){
+			foreach(BattleTile tile in this.tiles){
 				bool canSee = this.TestLOS(this.selectedTile, tile);
 
 				DebugDrawers.SpawnLine(
@@ -361,15 +295,15 @@ public class Battle : MonoBehaviour{
 		}
 	}
 
-	public HexTile GetTile(int index){
+	public BattleTile GetTile(int index){
 		return this.tiles[index];
 	}
 
-	public HexTile GetTile(int x, int y){
+	public BattleTile GetTile(int x, int y){
 		return this.tiles[x + y * this.mapSize.x];
 	}
 
-	public HexTile GetTile(Vector2i pos){
+	public BattleTile GetTile(Vector2i pos){
 		return this.tiles[pos.x + pos.y * this.mapSize.x];
 	}
 
@@ -395,7 +329,7 @@ public class Battle : MonoBehaviour{
 		}
 
 		// TODO: Temporarily control both teams until AI can move on its own
-		foreach(HexTile tile in this.tiles){
+		foreach(BattleTile tile in this.tiles){
 			if(tile.data.allowsMovement == true){
 				tile.SetRevealed(this.CanTeamSeeTile(this.currentTeam, tile) || this.visualFogOfWar == false);
 			}
@@ -427,8 +361,8 @@ public class Battle : MonoBehaviour{
 
 			BattleMech mech = this.GetTile(move.mechIndex).mech;
 			BattleMech targetMech = move.isFiring ? this.GetTile(move.targetMechIndex).mech : null;
-			HexTile fromTile = mech.tile;
-			HexTile toTile = this.GetTile(move.newIndex);
+			BattleTile fromTile = mech.tile;
+			BattleTile toTile = this.GetTile(move.newIndex);
 
 			this.pathNetwork.SetNodeEnabled(fromTile, true);
 
@@ -436,9 +370,9 @@ public class Battle : MonoBehaviour{
 			Assert.IsTrue(result.isValid);
 
 			bool isFiring = move.isFiring;
-			HexTile prevTile = (HexTile)result.nodes[0];
+			BattleTile prevTile = (BattleTile)result.nodes[0];
 			for(int n = 1; n < result.nodes.Count; ++n){
-				HexTile currentTile = (HexTile)result.nodes[n];
+				BattleTile currentTile = (BattleTile)result.nodes[n];
 
 				prevTile.mech = null;
 				currentTile.mech = mech;
@@ -457,10 +391,10 @@ public class Battle : MonoBehaviour{
 				prevTile = currentTile;
 			}
 
-			toTile.Attach(mech.transform, 10);
+			mech.PlaceAtMapTile(toTile.mapTile);
 
-			HexTile lastTile1 = (HexTile)result.nodes[result.nodes.Count - 2];
-			HexTile lastTile2 = (HexTile)result.nodes[result.nodes.Count - 1];
+			BattleTile lastTile1 = (BattleTile)result.nodes[result.nodes.Count - 2];
+			BattleTile lastTile2 = (BattleTile)result.nodes[result.nodes.Count - 1];
 			bool right = lastTile2.transform.position.x > lastTile1.transform.position.x;
 			MechDirection newDir = right ? MechDirection.Right : MechDirection.Left;
 			mech.SetDirection(newDir);
@@ -554,7 +488,7 @@ public class Battle : MonoBehaviour{
 	void DestroyMech(BattleMech mechToDestroy){
 		Debug.Log(mechToDestroy.name + " destroyed!");
 
-		HexTile tile = mechToDestroy.tile;
+		BattleTile tile = mechToDestroy.tile;
 
 		// Remove the mech and all references to it (such as teams and targets).
 
@@ -582,7 +516,7 @@ public class Battle : MonoBehaviour{
 		this.UpdateFogOfWar();
 	}
 
-	public bool TestLOS(HexTile tile1, HexTile tile2){
+	public bool TestLOS(BattleTile tile1, BattleTile tile2){
 		Vector2 from = tile1.Get2DPosition();
 		Vector2 to = tile2.Get2DPosition();
 		Vector2 dir = (to - from).normalized;
@@ -598,31 +532,17 @@ public class Battle : MonoBehaviour{
 		return canSee;
 	}
 
-	public bool CanTeamSeeTile(BattleTeam team, HexTile tile){
-		return team.visibleTiles[tile.pos.x + tile.pos.y * this.mapSize.x] == true || this.fogOfWar == false;
-	}
-
-	public GameObject CreateSprite(Sprite sprite, Transform parent = null){
-		float pitch = this.gameCamera.transform.rotation.eulerAngles.x;
-
-		GameObject go = new GameObject("Unnamed battle sprite");
-		go.transform.parent = parent;
-		go.transform.localRotation = Quaternion.Euler(new Vector3(pitch, 0f, 0f));
-		go.transform.localPosition = new Vector3(0f, 0f, this.hexSpacingY * -0.5f);
-		SpriteRenderer spriteRenderer = go.AddComponent<SpriteRenderer>();
-		spriteRenderer.sharedMaterial = Resources.Load<Material>("Materials/Game sprite");
-		spriteRenderer.sprite = sprite;
-
-		return go;
+	public bool CanTeamSeeTile(BattleTeam team, BattleTile tile){
+		return team.visibleTiles[tile.mapTile.pos.x + tile.mapTile.pos.y * this.mapSize.x] == true || this.fogOfWar == false;
 	}
 
 	// TODO: umm
 	void UpdateTargetTile(BattleMech mech){
 		if(mech.team == this.currentTeam && mech.target && this.CanTeamSeeTile(mech.team, mech.target.tile)){
-			mech.target.tile.Attach(this.targetTileGO.transform, 5);
-			this.targetTileGO.SetActive(true);
+			// mech.target.tile.mapTile.Attach(this.targetTileGO.transform, 5);
+			this.mapDisplay.SetTargetTile(mech.target.tile.mapTile);
 		}else{
-			this.targetTileGO.SetActive(false);
+			this.mapDisplay.DisableTargetTile();
 		}
 	}
 
@@ -638,12 +558,12 @@ public class Battle : MonoBehaviour{
 		if(this.state == BattleState.AiControl){
 			
 		}else if(this.state == BattleState.MoveAction){
-			if(this.moveActionData.ghostMechs != null){
-				foreach(GameObject go in this.moveActionData.ghostMechs){
-					Destroy(go);
+			if(this.moveActionData.ghostMechTiles != null){
+				foreach(BattleTile tile in this.moveActionData.ghostMechTiles){
+					tile.mapTile.RemoveLayer(MapTile.Layer.GhostSprite);
 				}
 			}
-			this.moveActionData.ghostMechs = null;
+			this.moveActionData.ghostMechTiles = null;
 
 			if(this.moveActionData.losLinesGO){
 				Destroy(this.moveActionData.losLinesGO);
@@ -672,8 +592,8 @@ public class Battle : MonoBehaviour{
 			this.hoveredTile = null;
 			this.selectedTile = null;
 
-			this.selectedTileGO.SetActive(false);
-			this.hoveredTileGO.SetActive(false);
+			this.mapDisplay.DisableSelectedTiles();
+			this.mapDisplay.DisableHoveredTile();
 
 			this.SetMenusUsable(false);
 			// TODO: ugh, this is AWFUL
@@ -687,7 +607,7 @@ public class Battle : MonoBehaviour{
 			this.moveActionData = new MoveActionData();
 			this.moveActionData.fromTile = this.selectedTile;
 			this.moveActionData.pathingResult = null;
-			this.moveActionData.ghostMechs = new List<GameObject>();
+			this.moveActionData.ghostMechTiles = new List<BattleTile>();
 			this.moveActionData.moved = false;
 
 			this.pathNetwork.SetNodeEnabled(this.moveActionData.fromTile, true);
@@ -704,10 +624,10 @@ public class Battle : MonoBehaviour{
 		if(this.state == BattleState.AiControl){
 			isHoveredTileGOActive = false;
 		}else if(this.state == BattleState.MoveAction){
-			foreach(GameObject go in this.moveActionData.ghostMechs){
-				Destroy(go);
+			foreach(BattleTile tile in this.moveActionData.ghostMechTiles){
+				tile.mapTile.RemoveLayer(MapTile.Layer.GhostSprite);
 			}
-			this.moveActionData.ghostMechs.Clear();
+			this.moveActionData.ghostMechTiles.Clear();
 
 			if(this.moveActionData.losLinesGO){
 				Destroy(this.moveActionData.losLinesGO);
@@ -734,20 +654,24 @@ public class Battle : MonoBehaviour{
 
 			// Create ghost mechs
 
-			this.moveActionData.ghostMechs.Capacity = result.nodes.Count - 1;
+			this.moveActionData.ghostMechTiles.Capacity = result.nodes.Count - 1;
 
 			GameObject prevGO = this.selectedTile.gameObject;
 			GameObject currentGO;
 			for(int n = 1; n < result.nodes.Count; ++n){
-				HexTile tile = (HexTile)result.nodes[n];
+				BattleTile tile = (BattleTile)result.nodes[n];
+
+				this.moveActionData.ghostMechTiles.Add(tile);
 
 				currentGO = tile.gameObject;
 
 				bool right = currentGO.transform.position.x > prevGO.transform.position.x;
-				MechDirection dir = right ? MechDirection.Right : MechDirection.Left;
-				GameObject ghostGO = this.selectedTile.mech.CreateGhost(dir);
-				this.moveActionData.ghostMechs.Add(ghostGO);
-				tile.Attach(ghostGO.transform, 20);
+				tile.mapTile.SetLayer(
+					MapTile.Layer.GhostSprite,
+					sprite: this.selectedTile.mech.data.sprite,
+					flipX: right,
+					color: new Color(1.0f, 1.0f, 1.0f, 0.5f)
+				);
 
 				prevGO = currentGO;
 			}
@@ -757,7 +681,7 @@ public class Battle : MonoBehaviour{
 			BattleMech target = this.selectedTile.mech.target;
 			if(target && this.selectedTile.mech.fireAuto){
 				for(int n = 1; n < result.nodes.Count; ++n){
-					HexTile tile = (HexTile)result.nodes[n];
+					BattleTile tile = (BattleTile)result.nodes[n];
 
 					GameObject go = (GameObject)Instantiate(Resources.Load("Prefabs/LOS line"));
 					go.transform.parent = this.moveActionData.losLinesGO.transform;
@@ -789,21 +713,17 @@ public class Battle : MonoBehaviour{
 
 		end:
 
-		this.hoveredTileGO.SetActive(isHoveredTileGOActive);
 		if(isHoveredTileGOActive){
-			this.hoveredTile.AttachForeground(this.hoveredTileGO.transform, 2);
-			var mr = this.hoveredTileGO.GetComponent<MeshRenderer>();
-			if(this.CanClickTile()){
-				mr.sharedMaterial = Resources.Load<Material>("Materials/Hovered tile");
-			}else{
-				mr.sharedMaterial = Resources.Load<Material>("Materials/Hovered tile invalid");
-			}
+			this.mapDisplay.SetHoveredTile(this.hoveredTile.mapTile);
+			this.mapDisplay.SetHoveredTileValid(this.CanClickTile());
+		}else{
+			this.mapDisplay.DisableHoveredTile();
 		}
 	}
 
 	// TODO: State dependent behaviour for when a tile can't be clicked
 	bool CanClickTile(){
-		HexTile tile = this.hoveredTile;
+		BattleTile tile = this.hoveredTile;
 
 		if(this.state == BattleState.SelectingAction){
 			return true;
@@ -849,22 +769,21 @@ public class Battle : MonoBehaviour{
 
 	// NOTE: can be null
 	void HexTileClicked(){
-		HexTile clickedTile = this.hoveredTile;
+		BattleTile clickedTile = this.hoveredTile;
 
 		if(this.state == BattleState.SelectingAction){
 			if(clickedTile != this.selectedTile){
 				if(this.selectedTile){
 					// Unselected this tile.
 
-					this.selectedTileGO.SetActive(false);
-					this.targetTileGO.SetActive(false);
+					this.mapDisplay.DisableSelectedTiles();
+					this.mapDisplay.DisableTargetTile();
 				}
 				this.selectedTile = clickedTile;
 				if(this.selectedTile){
 					// Selected this tile.
 
-					this.selectedTile.AttachForeground(this.selectedTileGO.transform, 1);
-					this.selectedTileGO.SetActive(true);
+					this.mapDisplay.SetSelectedTile(this.selectedTile.mapTile);
 
 					BattleMech mech = this.selectedTile.mech;
 
@@ -895,9 +814,8 @@ public class Battle : MonoBehaviour{
 				this.moveActionData.moved = true;
 
 				// Make this the new selected tile.
-				// Ugh, refactor this copied code into... something
 				this.selectedTile = clickedTile;
-				this.selectedTile.AttachForeground(this.selectedTileGO.transform, 1);
+				this.mapDisplay.SetSelectedTile(this.selectedTile.mapTile);
 
 				this.UpdateTargetTile(this.selectedTile.mech);
 				this.UpdateRightPanel();
@@ -928,7 +846,7 @@ public class Battle : MonoBehaviour{
 
 	// NOTE: can be null
 	void HexTileRightClicked(){
-//		HexTile clickedTile = this.hoveredTile;
+//		BattleTile clickedTile = this.hoveredTile;
 
 		if(this.state == BattleState.SelectingAction){
 			// Attack selected mech maybe?
@@ -943,33 +861,39 @@ public class Battle : MonoBehaviour{
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Event-like functions
 
-	public enum MouseEventType{
-		Enter,
-		Exit,
-		Click,
-		RightClick,
-	}
-	public void MouseEvent(HexTile tile, MouseEventType eventType){
+	public void MouseEvent(MapTile mapTile, MapDisplay.MouseEventType eventType){
 		if(hardInput.GetKey("Pan Camera")){
 			return;
 		}
 
-		HexTile newHoveredTile = this.hoveredTile;
+		BattleTile tile = mapTile ? this.GetTile(mapTile.pos) : null;
 
-		if(eventType == MouseEventType.Enter){
+		BattleTile newHoveredTile = this.hoveredTile;
+
+		if(eventType == MapDisplay.MouseEventType.Enter){
 			newHoveredTile = tile;
-		}else if(eventType == MouseEventType.Exit){
+		}else if(eventType == MapDisplay.MouseEventType.Exit){
 			newHoveredTile = null;
-		}else if(eventType == MouseEventType.Click){
+		}else if(eventType == MapDisplay.MouseEventType.Click){
 			if(this.CanClickTile()){
 				this.HexTileClicked();
 			}
-		}else if(eventType == MouseEventType.RightClick){
+		}else if(eventType == MapDisplay.MouseEventType.RightClick){
 			this.HexTileRightClicked();
 		}
 
 		if(newHoveredTile != this.hoveredTile){
+			if(this.hoveredTile){
+				// Stopped hovering this tile.
+
+				this.mapDisplay.DisableHoveredTile();
+			}
 			this.hoveredTile = newHoveredTile;
+			if(this.hoveredTile){
+				// Started hovering this tile.
+
+				this.mapDisplay.SetHoveredTile(this.hoveredTile.mapTile);
+			}
 
 			this.HexTileHovered();
 		}
