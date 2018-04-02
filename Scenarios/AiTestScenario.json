@@ -1,0 +1,48 @@
+{
+	"map": "3v3.json",
+	"startingTeamIndex": 1,
+	"teams": [
+		{
+			"color": {
+				"r": 0.1,
+				"g": 0.3,
+				"b": 1.0,
+				"a": 1.0
+			},
+			"isPlayer": true,
+			"mechs": [
+				{
+					"mechName": "Caliburn",
+					"direction": 1
+				}, {
+					"mechName": "Caliburn",
+					"direction": 1
+				}, {
+					"mechName": "Caliburn",
+					"direction": 1
+				}
+			]
+		},
+		{
+			"color": {
+				"r": 0.9,
+				"g": 0.15,
+				"b": 0.15,
+				"a": 1.0
+			},
+			"isPlayer": false,
+			"mechs": [
+				{
+					"mechName": "Solais",
+					"direction": 0
+				}, {
+					"mechName": "Solais",
+					"direction": 0
+				}, {
+					"mechName": "Solais",
+					"direction": 0
+				}
+			]
+		}
+	]
+}

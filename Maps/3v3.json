@@ -1,0 +1,774 @@
+{
+    "size": {
+        "x": 18,
+        "y": 15
+    },
+    "baseTileName": "Grass",
+    "tileOverrides": [
+        {
+            "pos": {
+                "x": 7,
+                "y": 0
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 7,
+                "y": 1
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 14,
+                "y": 14
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 13,
+                "y": 13
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 13,
+                "y": 12
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 12,
+                "y": 11
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 7,
+                "y": 8
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 7,
+                "y": 9
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 8,
+                "y": 10
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 8,
+                "y": 11
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 10,
+                "y": 14
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 9,
+                "y": 14
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 8,
+                "y": 14
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 7,
+                "y": 13
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 7,
+                "y": 12
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 6,
+                "y": 11
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 5,
+                "y": 11
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 5,
+                "y": 10
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 4,
+                "y": 11
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 4,
+                "y": 12
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 4,
+                "y": 13
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 4,
+                "y": 14
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 5,
+                "y": 12
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 6,
+                "y": 12
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 6,
+                "y": 13
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 7,
+                "y": 14
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 6,
+                "y": 14
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 5,
+                "y": 14
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 5,
+                "y": 13
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 3,
+                "y": 14
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 2,
+                "y": 14
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 1,
+                "y": 14
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 0,
+                "y": 14
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 0,
+                "y": 13
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 0,
+                "y": 12
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 0,
+                "y": 11
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 0,
+                "y": 10
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 0,
+                "y": 9
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 0,
+                "y": 4
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 0,
+                "y": 3
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 0,
+                "y": 2
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 0,
+                "y": 1
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 0,
+                "y": 0
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 0,
+                "y": 5
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 2,
+                "y": 0
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 1,
+                "y": 0
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 1,
+                "y": 1
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 1,
+                "y": 2
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 6,
+                "y": 6
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 5,
+                "y": 5
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 5,
+                "y": 6
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 5,
+                "y": 7
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 6,
+                "y": 7
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 3,
+                "y": 0
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 2,
+                "y": 1
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 3,
+                "y": 2
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 2,
+                "y": 3
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 15,
+                "y": 14
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 16,
+                "y": 14
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 15,
+                "y": 13
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 14,
+                "y": 13
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 14,
+                "y": 12
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 17,
+                "y": 14
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 17,
+                "y": 13
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 17,
+                "y": 0
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 16,
+                "y": 0
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 15,
+                "y": 1
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 15,
+                "y": 2
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 14,
+                "y": 1
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 14,
+                "y": 2
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 13,
+                "y": 3
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 12,
+                "y": 10
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 11,
+                "y": 9
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 11,
+                "y": 8
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 12,
+                "y": 9
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 14,
+                "y": 0
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 13,
+                "y": 0
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 12,
+                "y": 0
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 8,
+                "y": 0
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 17,
+                "y": 12
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 17,
+                "y": 11
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 17,
+                "y": 10
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 17,
+                "y": 9
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 17,
+                "y": 8
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 17,
+                "y": 7
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 17,
+                "y": 6
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 17,
+                "y": 5
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 17,
+                "y": 4
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 17,
+                "y": 3
+            },
+            "name": "Trees"
+        },
+        {
+            "pos": {
+                "x": 9,
+                "y": 5
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 9,
+                "y": 4
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 13,
+                "y": 4
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 13,
+                "y": 9
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 10,
+                "y": 2
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 10,
+                "y": 1
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 10,
+                "y": 0
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 9,
+                "y": 1
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 9,
+                "y": 0
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 11,
+                "y": 0
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 17,
+                "y": 1
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 17,
+                "y": 2
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 16,
+                "y": 1
+            },
+            "name": "Rock wall"
+        },
+        {
+            "pos": {
+                "x": 15,
+                "y": 0
+            },
+            "name": "Rock wall"
+        }
+    ],
+    "entities": [
+        {
+            "pos": {
+                "x": 1,
+                "y": 9
+            },
+            "name": "PlayerMechSpawn"
+        },
+        {
+            "pos": {
+                "x": 2,
+                "y": 11
+            },
+            "name": "PlayerMechSpawn"
+        },
+        {
+            "pos": {
+                "x": 3,
+                "y": 9
+            },
+            "name": "PlayerMechSpawn"
+        },
+        {
+            "pos": {
+                "x": 14,
+                "y": 11
+            },
+            "name": "EnemyMechSpawn"
+        },
+        {
+            "pos": {
+                "x": 16,
+                "y": 11
+            },
+            "name": "EnemyMechSpawn"
+        },
+        {
+            "pos": {
+                "x": 15,
+                "y": 9
+            },
+            "name": "EnemyMechSpawn"
+        }
+    ]
+}

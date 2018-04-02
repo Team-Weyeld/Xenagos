@@ -245,8 +245,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c93ee41bc75bee4c93c88aa762374b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scenarioToLoad: OriginalTestScenario.json
-  loadMapEditorInstead: 1
+  scenarioToLoad: AiTestScenario.json
+  loadMapEditorInstead: 0
+  _fixedFrameCount: 0
 --- !u!4 &1324693376
 Transform:
   m_ObjectHideFlags: 0
