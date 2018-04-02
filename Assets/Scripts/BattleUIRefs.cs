@@ -7,6 +7,7 @@ public class BattleUIRefs : MonoBehaviour{
 	public Canvas canvas;
 	[Header("Unit list panel")]
 	public Button finishTurnButton;
+	public Button advanceAiButton;
 	[Header("Tile info panel")]
 	public GameObject tileInfoBorder;
 	[Space]

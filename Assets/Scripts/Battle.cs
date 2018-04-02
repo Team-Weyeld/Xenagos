@@ -57,7 +57,6 @@ public class Battle :
 	BattleTeam currentTeam;
 	// TODO: This is dumb, though it will eventually be a meter instead of text. Make an ActionPointMeter Monobehaviour?
 	Color apTextOriginalColor;
-	long aiBeginStateFrame = 0;
 
 	MoveActionData moveActionData;
 
@@ -187,6 +186,8 @@ public class Battle :
 
 		// UI stuff.
 
+		this.uiRefs.advanceAiButton.interactable = false;
+
 		this.uiRefs.tileInfoBorder.SetActive(false);
 		this.uiRefs.mechTab.SetActive(false);
 		this.uiRefs.pilotTab.SetActive(false);
@@ -194,6 +195,7 @@ public class Battle :
 		this.uiRefs.actionsPanel.SetActive(false);
 
 		Utility.AddButtonClickListener(this.uiRefs.finishTurnButton, this.UnitListButtonPressed);
+		Utility.AddButtonClickListener(this.uiRefs.advanceAiButton, this.UnitListButtonPressed);
 
 		Utility.AddButtonClickListener(this.uiRefs.mechTabButton, this.TileInfoTabButtonClicked);
 		Utility.AddButtonClickListener(this.uiRefs.pilotTabButton, this.TileInfoTabButtonClicked);
@@ -289,17 +291,6 @@ public class Battle :
 			}
 
 			Debug.Log("Wrote save to " + path);
-		}
-	}
-
-	void FixedUpdate(){
-		if(this.state == BattleState.AiControl){
-			float aiUpdateEverySeconds = 1f;
-			int aiUpdateInterval = (int)(aiUpdateEverySeconds / (float)Time.fixedDeltaTime);
-
-			if(Game.fixedFrameCount - this.aiBeginStateFrame >= aiUpdateInterval){
-				this.currentTeam.ai.Update();
-			}
 		}
 	}
 
@@ -408,6 +399,7 @@ public class Battle :
 			mech.SetDirection(newDir);
 
 			var apCostResult = mech.GetAPCostForMove(result.nodes);
+			Assert.IsTrue(mech.actionPoints > 0);
 			mech.actionPoints -= apCostResult.ap;
 
 			this.pathNetwork.SetNodeEnabled(toTile, false);
@@ -543,11 +535,9 @@ public class Battle :
 	public bool CanTeamSeeTile(BattleTeam team, BattleTile tile){
 		return team.visibleTiles[tile.mapTile.pos.x + tile.mapTile.pos.y * this.mapSize.x] == true || this.fogOfWar == false;
 	}
-
-	// TODO: umm
+		
 	void UpdateTargetTile(BattleMech mech){
 		if(mech.team == this.currentTeam && mech.target && this.CanTeamSeeTile(mech.team, mech.target.tile)){
-			// mech.target.tile.mapTile.Attach(this.targetTileGO.transform, 5);
 			this.mapDisplay.SetTargetTile(mech.target.tile.mapTile);
 		}else{
 			this.mapDisplay.DisableTargetTile();
@@ -564,7 +554,7 @@ public class Battle :
 		}
 
 		if(this.state == BattleState.AiControl){
-			
+			this.uiRefs.advanceAiButton.interactable = false;
 		}else if(this.state == BattleState.MoveAction){
 			if(this.moveActionData.ghostMechTiles != null){
 				foreach(BattleTile tile in this.moveActionData.ghostMechTiles){
@@ -595,8 +585,6 @@ public class Battle :
 				this.SetState(BattleState.AiControl);
 			}
 		}else if(this.state == BattleState.AiControl){
-			this.aiBeginStateFrame = Game.fixedFrameCount;
-
 			this.hoveredTile = null;
 			this.selectedTile = null;
 
@@ -604,6 +592,7 @@ public class Battle :
 			this.mapDisplay.DisableHoveredTile();
 
 			this.SetMenusUsable(false);
+			this.uiRefs.advanceAiButton.interactable = true;
 			// TODO: ugh, this is AWFUL
 			this.AdjustTileInfoTabButtonGraphics();
 			this.UpdateRightPanel();
@@ -1036,6 +1025,8 @@ public class Battle :
 		if(button == this.uiRefs.finishTurnButton){
 			this.AdvanceTurn();
 			this.SetState(BattleState.EndOfAction);
+		}else if(button == this.uiRefs.advanceAiButton){
+			this.currentTeam.ai.Update();
 		}
 	}
 
