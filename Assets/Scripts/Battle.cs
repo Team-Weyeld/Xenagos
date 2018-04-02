@@ -6,6 +6,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
 
+using UnityEditor;
+
 public enum BattleState{
 	None,
 	AiControl,
@@ -46,7 +48,7 @@ public class Battle :
 	[HideInInspector] public Game game;
 	[HideInInspector] public Vector2i mapSize;
 	[HideInInspector] public PathNetwork pathNetwork;
-	[HideInInspector] public List<BattleTeam> teams;
+	public List<BattleTeam> teams;
 
 	BattleHistory history;
 	BattleState state = BattleState.None;
@@ -232,6 +234,11 @@ public class Battle :
 		}else{
 			this.SetState(BattleState.AiControl);
 		}
+
+
+		// testing
+		EditorGUIUtility.PingObject(this);
+		Selection.objects = new Object[]{this.gameObject};
 	}
 
 	void Update(){
