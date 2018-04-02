@@ -189,8 +189,8 @@ public class MapTile :
 		}
 	}
 
-	void OnDrawGizmosSelected(){
-		Gizmos.color = Color.white;
+	void OnDrawGizmos(){
+		Gizmos.color = new Color(1f,1f,1f, 0.1f);
 
 		for(int n = 0; n < this.hexVerts.Length; ++n){
 			int n2 = (n + 1) % this.hexVerts.Length;
