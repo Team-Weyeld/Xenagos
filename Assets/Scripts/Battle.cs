@@ -318,23 +318,23 @@ public class Battle :
 
 		foreach(BattleTeam team in this.teams){
 			for(int n = 0; n < tileCount; ++n){
-				team.visibleTiles[n] = true;
-			}
+				team.visibleTiles[n] = false;
 
-			foreach(BattleMech mech in team.mechs){
-				for(int n = 0; n < tileCount; ++n){
-					if(
-						this.tiles[n].data.allowsMovement == true &&
-						this.TestLOS(mech.tile, this.tiles[n]) == false &&
-						this.fogOfWar == true
-					){
-						team.visibleTiles[n] = false;
+				if(this.fogOfWar == false || this.tiles[n].data.allowsMovement == false){
+					team.visibleTiles[n] = true;
+				}else{
+					foreach(BattleMech mech in team.mechs){
+						if(this.TestLOS(mech.tile, this.tiles[n])){
+							team.visibleTiles[n] = true;
+							break;
+						}
 					}
 				}
 			}
 		}
 
 		// TODO: Temporarily control both teams until AI can move on its own
+		// update: what
 		foreach(BattleTile tile in this.tiles){
 			if(tile.data.allowsMovement == true){
 				tile.SetRevealed(this.CanTeamSeeTile(this.currentTeam, tile) || this.visualFogOfWar == false);
