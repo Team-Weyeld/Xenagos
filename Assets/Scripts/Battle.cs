@@ -259,11 +259,19 @@ public class Battle :
 				return;
 			}
 
+			if(this.selectedTile.mech){
+				this.pathNetwork.SetNodeEnabled(this.selectedTile, true);
+			}
+
 			PathingResult result = this.pathNetwork.FindPath(
 				this.selectedTile,
 				this.hoveredTile,
 				true
 			);
+
+			if(this.selectedTile.mech){
+				this.pathNetwork.SetNodeEnabled(this.selectedTile, false);
+			}
 
 			if(result.isValid){
 				Debug.Log(result.nodes.Count + " nodes in path " + result.distance + " units long.");
