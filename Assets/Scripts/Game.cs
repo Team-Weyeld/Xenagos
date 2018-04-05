@@ -4,6 +4,10 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 public class Game : MonoBehaviour{
 	public string scenarioToLoad = "OriginalTestScenario.json";
 	public bool loadMapEditorInstead = false;
@@ -100,5 +104,10 @@ public class Game : MonoBehaviour{
 		GameObject go = GameObject.Find("Battle");
 		Battle battle = go.GetComponent<Battle>();
 		battle.Init(this, battleHistory);
+
+#if UNITY_EDITOR
+		EditorGUIUtility.PingObject(battle);
+		Selection.objects = new Object[]{battle.gameObject};
+#endif
 	}
 }

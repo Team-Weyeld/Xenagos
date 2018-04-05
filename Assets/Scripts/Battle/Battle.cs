@@ -6,8 +6,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
 
-using UnityEditor;
-
 public enum BattleState{
 	None,
 	AiControl,
@@ -258,11 +256,6 @@ public class Battle :
 		}else{
 			this.SetState(BattleState.AiControl);
 		}
-
-
-		// testing
-		EditorGUIUtility.PingObject(this);
-		Selection.objects = new Object[]{this.gameObject};
 	}
 
 	void Update(){
