@@ -33,6 +33,8 @@ public class Game : MonoBehaviour{
 	void Start(){
 		Object.DontDestroyOnLoad(this.gameObject);
 
+		Random.InitState(0451);
+
 		if(this.loadMapEditorInstead){
 			SceneManager.LoadScene("Map editor");
 		}else{
