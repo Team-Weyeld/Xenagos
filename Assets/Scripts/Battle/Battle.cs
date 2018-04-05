@@ -17,6 +17,29 @@ public enum BattleState{
 	SetTargetAction,
 }
 
+public static class BattleMove{
+	[System.Serializable]
+	public struct Move{
+		public int mechIndex;
+		public int newIndex;
+		public bool isFiring;
+		public int targetMechIndex;
+	}
+
+	[System.Serializable]
+	public struct StandingFire{
+		public int mechIndex;
+		public int targetMechIndex;
+	}
+
+	[System.Serializable]
+	public struct SetTarget{
+		public int mechIndex;
+		public bool hasTarget;
+		public int targetMechIndex;
+	}
+}
+
 [System.Serializable]
 struct MoveActionData{
 	public BattleTile fromTile;
@@ -60,6 +83,7 @@ public class Battle :
 	// TODO: This is dumb, though it will eventually be a meter instead of text. Make an ActionPointMeter Monobehaviour?
 	Color apTextOriginalColor;
 
+	// TODO: stare as a generic object named actionData?
 	MoveActionData moveActionData;
 
 	public void Init(Game game, BattleHistory battleHistory){

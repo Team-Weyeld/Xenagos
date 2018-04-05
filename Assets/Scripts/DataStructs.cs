@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// TODO: rename to "Tile/SpriteDirection"?
 public enum MechDirection{
 	Left,
 	Right,
@@ -47,29 +48,6 @@ public struct BattleMap{
 	public string baseTileName;
 	public List<TileOverride> tileOverrides;
 	public List<Entity> entities;
-}
-
-public static class BattleMove{
-	[System.Serializable]
-	public struct Move{
-		public int mechIndex;
-		public int newIndex;
-		public bool isFiring;
-		public int targetMechIndex;
-	}
-
-	[System.Serializable]
-	public struct StandingFire{
-		public int mechIndex;
-		public int targetMechIndex;
-	}
-
-	[System.Serializable]
-	public struct SetTarget{
-		public int mechIndex;
-		public bool hasTarget;
-		public int targetMechIndex;
-	}
 }
 
 [System.Serializable]
